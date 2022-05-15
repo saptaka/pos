@@ -106,7 +106,7 @@ func (r *router) DownloadOrder(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(statusCode)
 		return
 	}
-	response, statusCode := r.handlerService.DownloadOrder()
+	response, statusCode := r.handlerService.DownloadOrder(id)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
 		return

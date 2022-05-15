@@ -1,10 +1,11 @@
-FROM golang:alpine AS build-env
-RUN apk --no-cache add build-base git bzr mercurial gcc
-ADD . /src
-RUN cd /src && go build -o goapp
 
-FROM alpine
-WORKDIR /app
-COPY --from=build-env /src/goapp /app/
-EXPOSE 3030
-CMD [ "/goapp" ]
+FROM golang:1.16
+WORKDIR /go/src/
+COPY . ./
+RUN CGO_ENABLED=0 GOOS=linux go build -o app .
+
+FROM alpine:latest  
+RUN apk --no-cache add ca-certificates
+WORKDIR /root/
+COPY --from=0 /go/src/app ./
+CMD ["./app"]  
