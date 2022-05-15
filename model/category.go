@@ -1,0 +1,15 @@
+package model
+
+import "time"
+
+type Category struct {
+	CategoryId int64      `json:"categoryId"`
+	Name       string     `json:"name" validate:"required"`
+	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
+	CreatedAt  *time.Time `json:"createdAt,omitempty"`
+}
+
+type ListCategory struct {
+	Categories []Category `json:"categorys"`
+	Meta       Meta       `json:"meta"`
+}
