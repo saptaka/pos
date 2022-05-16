@@ -74,7 +74,7 @@ func (s service) UpdateCashier(cashierDetail model.Cashier) ([]byte, int) {
 
 	err := s.db.UpdateCashier(s.ctx, cashierDetail)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
 		log.Println(err)

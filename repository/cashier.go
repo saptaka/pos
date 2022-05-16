@@ -126,8 +126,18 @@ func (r repo) CreateCashier(ctx context.Context, name, passcode string) (model.C
 
 func (r repo) DeleteCashier(ctx context.Context, id int64) error {
 	query := "DELETE FROM cashiers WHERE id=?"
-	_, err := r.db.ExecContext(ctx, query, id)
-	return err
+	result, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	rowAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowAffected == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func (r repo) GetPasscodeById(ctx context.Context, id int64) (string, error) {
