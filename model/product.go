@@ -5,7 +5,7 @@ import "time"
 type Product struct {
 	ProductId  int64      `json:"productId"`
 	Name       string     `json:"name" validate:"required"`
-	SKU        string     `json:"sku,,omitempty"`
+	SKU        string     `json:"sku,omitempty"`
 	Stock      int        `json:"stock,omitempty" validate:"required"`
 	Price      int        `json:"price" validate:"required"`
 	Image      string     `json:"image,omitempty"`

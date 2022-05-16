@@ -10,6 +10,6 @@ type Category struct {
 }
 
 type ListCategory struct {
-	Categories []Category `json:"categorys"`
+	Categories []Category `json:"categories"`
 	Meta       Meta       `json:"meta"`
 }
