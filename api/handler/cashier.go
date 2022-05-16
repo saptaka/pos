@@ -86,7 +86,7 @@ func (s service) UpdateCashier(cashierDetail model.Cashier) ([]byte, int) {
 func (s service) DeleteCashier(id int64) ([]byte, int) {
 	err := s.db.DeleteCashier(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
 		log.Println(err)
