@@ -20,11 +20,11 @@ type PaymentRouter interface {
 }
 
 func (r *router) RoutePaymentPath() {
-	r.mux.HandleFunc("/payments", verifyToken(r.ListPayment)).Methods("GET")
-	r.mux.HandleFunc("/payments/{paymentId}", verifyToken(r.DetailPayment)).Methods("GET")
-	r.mux.HandleFunc("/payments", verifyToken(r.CreatePayment)).Methods("POST")
-	r.mux.HandleFunc("/payments/{paymentId}", verifyToken(r.UpdatePayment)).Methods("PUT")
-	r.mux.HandleFunc("/payments/{paymentId}", verifyToken(r.DeletePayment)).Methods("DELETE")
+	r.mux.HandleFunc("/payments", middleware(r.ListPayment)).Methods("GET")
+	r.mux.HandleFunc("/payments/{paymentId}", middleware(r.DetailPayment)).Methods("GET")
+	r.mux.HandleFunc("/payments", middleware(r.CreatePayment)).Methods("POST")
+	r.mux.HandleFunc("/payments/{paymentId}", middleware(r.UpdatePayment)).Methods("PUT")
+	r.mux.HandleFunc("/payments/{paymentId}", middleware(r.DeletePayment)).Methods("DELETE")
 }
 
 func (r *router) ListPayment(res http.ResponseWriter, req *http.Request) {

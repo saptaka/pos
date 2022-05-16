@@ -20,11 +20,11 @@ type CategoryRouter interface {
 }
 
 func (r *router) RouteCategoryPath() {
-	r.mux.HandleFunc("/categories", verifyToken(r.ListCategory)).Methods("GET")
-	r.mux.HandleFunc("/categories/{categoryId}", verifyToken(r.DetailCategory)).Methods("GET")
-	r.mux.HandleFunc("/categories", verifyToken(r.CreateCategory)).Methods("POST")
-	r.mux.HandleFunc("/categories/{categoryId}", verifyToken(r.UpdateCategory)).Methods("PUT")
-	r.mux.HandleFunc("/categories/{categoryId}", verifyToken(r.DeleteCategory)).Methods("DELETE")
+	r.mux.HandleFunc("/categories", middleware(r.ListCategory)).Methods("GET")
+	r.mux.HandleFunc("/categories/{categoryId}", middleware(r.DetailCategory)).Methods("GET")
+	r.mux.HandleFunc("/categories", middleware(r.CreateCategory)).Methods("POST")
+	r.mux.HandleFunc("/categories/{categoryId}", middleware(r.UpdateCategory)).Methods("PUT")
+	r.mux.HandleFunc("/categories/{categoryId}", middleware(r.DeleteCategory)).Methods("DELETE")
 }
 
 func (r *router) ListCategory(res http.ResponseWriter, req *http.Request) {

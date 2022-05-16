@@ -11,8 +11,8 @@ type ReportRouter interface {
 }
 
 func (r *router) RouteReportPath() {
-	r.mux.HandleFunc("/revenues", verifyToken(r.Revenue)).Methods("GET")
-	r.mux.HandleFunc("/solds", verifyToken(r.Solds)).Methods("GET")
+	r.mux.HandleFunc("/revenues", middleware(r.Revenue)).Methods("GET")
+	r.mux.HandleFunc("/solds", middleware(r.Solds)).Methods("GET")
 }
 
 func (r *router) Revenue(res http.ResponseWriter, req *http.Request) {

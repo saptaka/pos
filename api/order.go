@@ -21,12 +21,12 @@ type OrderRouter interface {
 }
 
 func (r *router) RouteOrderPath() {
-	r.mux.HandleFunc("/orders", verifyToken(r.ListOrder)).Methods("GET")
-	r.mux.HandleFunc("/orders/{orderId}", verifyToken(r.DetailOrder)).Methods("GET")
-	r.mux.HandleFunc("/orders/subtotal", verifyToken(r.SubTotalOrder)).Methods("POST")
-	r.mux.HandleFunc("/orders", verifyToken(r.AddOrder)).Methods("POST")
-	r.mux.HandleFunc("/orders/{orderId}/download", verifyToken(r.DownloadOrder)).Methods("GET")
-	r.mux.HandleFunc("/orders/{orderId}", verifyToken(r.CheckOrderDownload)).Methods("GET")
+	r.mux.HandleFunc("/orders", middleware(r.ListOrder)).Methods("GET")
+	r.mux.HandleFunc("/orders/{orderId}", middleware(r.DetailOrder)).Methods("GET")
+	r.mux.HandleFunc("/orders/subtotal", middleware(r.SubTotalOrder)).Methods("POST")
+	r.mux.HandleFunc("/orders", middleware(r.AddOrder)).Methods("POST")
+	r.mux.HandleFunc("/orders/{orderId}/download", middleware(r.DownloadOrder)).Methods("GET")
+	r.mux.HandleFunc("/orders/{orderId}", middleware(r.CheckOrderDownload)).Methods("GET")
 }
 
 func (r *router) ListOrder(res http.ResponseWriter, req *http.Request) {

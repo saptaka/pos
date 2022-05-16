@@ -20,11 +20,11 @@ type CashierRouter interface {
 }
 
 func (r *router) RouteCashierPath() {
-	r.mux.HandleFunc("/cashiers", verifyToken(r.ListCashier)).Methods("GET")
-	r.mux.HandleFunc("/cashiers/{cashierId}", verifyToken(r.DetailCashier)).Methods("GET")
-	r.mux.HandleFunc("/cashiers", verifyToken(r.CreateCashier)).Methods("POST")
-	r.mux.HandleFunc("/cashiers/{cashierId}", verifyToken(r.UpdateCashier)).Methods("PUT")
-	r.mux.HandleFunc("/cashiers/{cashierId}", verifyToken(r.DeleteCashier)).Methods("DELETE")
+	r.mux.HandleFunc("/cashiers", middleware(r.ListCashier)).Methods("GET")
+	r.mux.HandleFunc("/cashiers/{cashierId}", middleware(r.DetailCashier)).Methods("GET")
+	r.mux.HandleFunc("/cashiers", middleware(r.CreateCashier)).Methods("POST")
+	r.mux.HandleFunc("/cashiers/{cashierId}", middleware(r.UpdateCashier)).Methods("PUT")
+	r.mux.HandleFunc("/cashiers/{cashierId}", middleware(r.DeleteCashier)).Methods("DELETE")
 }
 
 func (r *router) ListCashier(res http.ResponseWriter, req *http.Request) {
