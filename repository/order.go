@@ -209,7 +209,7 @@ func (r repo) CreateOrderedProduct(ctx context.Context,
 	}
 	template := "(?,?,?,?,?,?,?)"
 	if len(orderRequests) > 1 {
-		template += strings.Repeat(",?", len(orderRequests)-1)
+		template += strings.Repeat(",(?,?,?,?,?,?,?)", len(orderRequests)-1)
 	}
 	query = fmt.Sprintf(query, template)
 	stmt, err := r.db.PrepareContext(ctx, query)
