@@ -18,7 +18,7 @@ type Login interface {
 func (s service) GetPasscode(id int64) ([]byte, int) {
 	passcode, err := s.db.GetPasscodeById(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
 		log.Println(err)
@@ -38,7 +38,7 @@ func (s service) VerifyLogin(id int64, passcode, token string) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	if cashierPasscode != passcode {
-		return utils.ResponseWrapper(http.StatusForbidden, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	tokenData := make(map[string]interface{})
 	tokenData["token"] = token
