@@ -69,7 +69,7 @@ func (s service) UpdateCategory(category model.Category) ([]byte, int) {
 
 	err := s.db.UpdateCategory(s.ctx, category)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
 		log.Println(err)
@@ -81,7 +81,7 @@ func (s service) UpdateCategory(category model.Category) ([]byte, int) {
 func (s service) DeleteCategory(id int) ([]byte, int) {
 	err := s.db.DeleteCategory(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
 		log.Println(err)
