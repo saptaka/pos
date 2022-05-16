@@ -9,7 +9,7 @@ type Product struct {
 	Stock      int        `json:"stock,omitempty" validate:"required"`
 	Price      int        `json:"price" validate:"required"`
 	Image      string     `json:"image,omitempty"`
-	CategoryID int        `json:"categoryId,omitempty"`
+	CategoryID int64      `json:"categoryId,omitempty"`
 	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
 	CreatedAt  *time.Time `json:"createdAt,omitempty"`
 	Discount   *Discount  `json:"discount,omitempty"`
