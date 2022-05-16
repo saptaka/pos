@@ -61,26 +61,6 @@ func (r repo) SetupTableStructure() {
 		UNIQUE KEY id (id)
 	  ) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 ;`
 
-	orderedProductsTable := `
-	  CREATE TABLE  IF NOT EXISTS ordered_products (
-		id bigint unsigned NOT NULL AUTO_INCREMENT,
-		product_id bigint unsigned NOT NULL,
-		order_id bigint unsigned NOT NULL,
-		qty int DEFAULT NULL,
-		total_normal_price int DEFAULT NULL,
-		total_final_price int DEFAULT NULL,
-		discount_id bigint unsigned DEFAULT NULL,
-		price_product int DEFAULT NULL,
-		UNIQUE KEY id (id),
-		KEY fk_product_id (product_id),
-		KEY fk_order_id (order_id),
-		KEY fk_ordered_discount (discount_id),
-		CONSTRAINT fk_order_id FOREIGN KEY (order_id) REFERENCES orders (id),
-		CONSTRAINT fk_ordered_discount FOREIGN KEY (discount_id) REFERENCES discounts (id),
-		CONSTRAINT fk_product_id FOREIGN KEY (product_id) REFERENCES products (id)
-	  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 ; 
-	  `
-
 	ordersTable := `
 	  CREATE TABLE  IF NOT EXISTS orders (
 		id bigint unsigned NOT NULL AUTO_INCREMENT,
@@ -135,6 +115,26 @@ func (r repo) SetupTableStructure() {
 	   
 	  `
 
+	orderedProductsTable := `
+	  CREATE TABLE  IF NOT EXISTS ordered_products (
+		id bigint unsigned NOT NULL AUTO_INCREMENT,
+		product_id bigint unsigned NOT NULL,
+		order_id bigint unsigned NOT NULL,
+		qty int DEFAULT NULL,
+		total_normal_price int DEFAULT NULL,
+		total_final_price int DEFAULT NULL,
+		discount_id bigint unsigned DEFAULT NULL,
+		price_product int DEFAULT NULL,
+		UNIQUE KEY id (id),
+		KEY fk_product_id (product_id),
+		KEY fk_order_id (order_id),
+		KEY fk_ordered_discount (discount_id),
+		CONSTRAINT fk_order_id FOREIGN KEY (order_id) REFERENCES orders (id),
+		CONSTRAINT fk_ordered_discount FOREIGN KEY (discount_id) REFERENCES discounts (id),
+		CONSTRAINT fk_product_id FOREIGN KEY (product_id) REFERENCES products (id)
+	  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 ; 
+	  `
+
 	_, err := r.db.ExecContext(context.Background(), cashiersTable)
 	if err != nil {
 		panic(err)
@@ -143,23 +143,28 @@ func (r repo) SetupTableStructure() {
 	if err != nil {
 		panic(err)
 	}
+
 	_, err = r.db.ExecContext(context.Background(), discountsTable)
 	if err != nil {
 		panic(err)
 	}
-	_, err = r.db.ExecContext(context.Background(), orderedProductsTable)
-	if err != nil {
-		panic(err)
-	}
-	_, err = r.db.ExecContext(context.Background(), ordersTable)
-	if err != nil {
-		panic(err)
-	}
+
 	_, err = r.db.ExecContext(context.Background(), paymentsTable)
 	if err != nil {
 		panic(err)
 	}
+
+	_, err = r.db.ExecContext(context.Background(), ordersTable)
+	if err != nil {
+		panic(err)
+	}
+
 	_, err = r.db.ExecContext(context.Background(), productsTable)
+	if err != nil {
+		panic(err)
+	}
+
+	_, err = r.db.ExecContext(context.Background(), orderedProductsTable)
 	if err != nil {
 		panic(err)
 	}
