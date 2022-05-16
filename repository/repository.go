@@ -33,7 +33,7 @@ func (r repo) SetupTableStructure() {
 	cashiersTable := `CREATE TABLE IF NOT EXISTS cashiers (
 		id bigint unsigned NOT NULL AUTO_INCREMENT,
 		name varchar(255) CHARACTER SET utf8mb4  NOT NULL DEFAULT 'DEFAULT',
-		passcode varchar(6) CHARACTER SET utf8mb4  NOT NULL,
+		passcode varchar(255) CHARACTER SET utf8mb4  NOT NULL,
 		updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		UNIQUE KEY id (id)
