@@ -100,7 +100,7 @@ func (r repo) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
 		orders o
 		LEFT JOIN cashiers c ON o.cashier_id = c.id
 		LEFT JOIN payments p ON o.payment_type_id = p.id
-		WHERE id=?;`
+		WHERE o.id=?;`
 
 	rows := r.db.QueryRowContext(ctx, querySelect, id)
 
@@ -171,11 +171,48 @@ func (r repo) CreateOrder(ctx context.Context, orderRequest model.Order) (model.
 }
 
 func (r repo) DownloadReceipt(ctx context.Context, id int64) (string, error) {
+	order, err := r.GetOrderByID(ctx, id)
+	if err != nil {
+		return "", err
+	}
+	err = r.updateIsDownloadReceipt(ctx, id)
+	if err != nil {
+		return "", err
+	}
+	return order.ReceiptIDFilePath, nil
+}
 
-	return "", nil
+func (r repo) updateIsDownloadReceipt(ctx context.Context, id int64) error {
+	query := `
+		UPDATE orders SET is_downloaded = 1 WHERE id=?
+	`
+	result, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	rowAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowAffected == 0 {
+		return sql.ErrNoRows
+	}
+	return nil
 }
 
 func (r repo) GetDownloadStatus(ctx context.Context, id int64) (bool, error) {
+	query := `
+		SELECT is_downloaded FROM orders WHERE id=?
+	`
+	var isDownload int
+	rows := r.db.QueryRowContext(ctx, query, id)
+	err := rows.Scan(&isDownload)
+	if err != nil {
+		return false, err
+	}
+	if isDownload == 0 {
+		return false, nil
+	}
 
 	return true, nil
 }

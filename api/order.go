@@ -26,7 +26,7 @@ func (r *router) RouteOrderPath() {
 	r.mux.HandleFunc("/orders/subtotal", middleware(r.SubTotalOrder)).Methods("POST")
 	r.mux.HandleFunc("/orders", middleware(r.AddOrder)).Methods("POST")
 	r.mux.HandleFunc("/orders/{orderId}/download", middleware(r.DownloadOrder)).Methods("GET")
-	r.mux.HandleFunc("/orders/{orderId}", middleware(r.CheckOrderDownload)).Methods("GET")
+	r.mux.HandleFunc("/orders/{orderId}/check-download", middleware(r.CheckOrderDownload)).Methods("GET")
 }
 
 func (r *router) ListOrder(res http.ResponseWriter, req *http.Request) {
@@ -106,7 +106,7 @@ func (r *router) AddOrder(res http.ResponseWriter, req *http.Request) {
 
 func (r *router) DownloadOrder(res http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
-	idParams := params["cashierId"]
+	idParams := params["orderId"]
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
@@ -125,7 +125,16 @@ func (r *router) DownloadOrder(res http.ResponseWriter, req *http.Request) {
 }
 
 func (r *router) CheckOrderDownload(res http.ResponseWriter, req *http.Request) {
-	response, statusCode := r.handlerService.CheckOrderDownload()
+	params := mux.Vars(req)
+	idParams := params["orderId"]
+	id, _ := strconv.ParseInt(idParams, 10, 0)
+	if id == 0 {
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		res.WriteHeader(statusCode)
+		res.Write(response)
+		return
+	}
+	response, statusCode := r.handlerService.CheckOrderDownload(id)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
 		res.Write(response)

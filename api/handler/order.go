@@ -17,7 +17,7 @@ type Order interface {
 	SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int)
 	AddOrder(product model.AddOrderRequest) ([]byte, int)
 	DownloadOrder(id int64) ([]byte, int)
-	CheckOrderDownload() ([]byte, int)
+	CheckOrderDownload(id int64) ([]byte, int)
 }
 
 func (s service) ListOrder(limit, skip int) ([]byte, int) {
@@ -120,11 +120,23 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 }
 
 func (s service) DownloadOrder(id int64) ([]byte, int) {
-	return utils.ResponseWrapper(http.StatusAccepted, "haha")
+	receiptPath, err := s.db.DownloadReceipt(s.ctx, id)
+	if err == sql.ErrNoRows {
+		return utils.ResponseWrapper(http.StatusNotFound, receiptPath)
+	}
+	if err != nil {
+		return utils.ResponseWrapper(http.StatusInternalServerError, receiptPath)
+	}
+	return utils.ResponseWrapper(http.StatusOK, receiptPath)
 }
 
-func (s service) CheckOrderDownload() ([]byte, int) {
-	return utils.ResponseWrapper(http.StatusAccepted, "haha")
+func (s service) CheckOrderDownload(id int64) ([]byte, int) {
+	isDownloaded, err := s.db.GetDownloadStatus(s.ctx, id)
+	if err == sql.ErrNoRows {
+		return utils.ResponseWrapper(http.StatusNotFound, nil)
+	}
+	isDownloadedJson := map[string]interface{}{"isDownload": isDownloaded}
+	return utils.ResponseWrapper(http.StatusOK, isDownloadedJson)
 }
 
 func (s service) calculatePrice(discount model.Discount, price, qty int) int {
