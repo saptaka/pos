@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/saptaka/pos/utils"
 )
@@ -52,8 +53,8 @@ func (s service) VerifyLogout(id int64, passcode string) ([]byte, int) {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
-	if cashierPasscode == passcode {
+	if strings.Compare(cashierPasscode, passcode) == 0 {
 		return utils.ResponseWrapper(http.StatusOK, nil)
 	}
-	return utils.ResponseWrapper(http.StatusBadRequest, nil)
+	return utils.ResponseWrapper(http.StatusForbidden, nil)
 }
