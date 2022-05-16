@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"database/sql"
+	"log"
 	"net/http"
 	"sort"
 
@@ -26,6 +27,7 @@ func (s service) ListOrder(limit, skip int) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, orders)
@@ -37,6 +39,7 @@ func (s service) DetailOrder(id int64) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, order)
@@ -90,12 +93,14 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 
 	products, err := s.db.GetProductsByIds(s.ctx, productIds)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	orderedProductDetails, totalPrice := s.generateOrderedProduct(products, mapProductQty)
 
 	paymentType, err := s.getPaymentType(s.ctx, orderRequest.PaymentID)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	order := model.Order{
@@ -108,6 +113,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 	order.PaymentType = paymentType
 	order, err = s.db.CreateOrder(s.ctx, order)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, order)

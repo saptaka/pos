@@ -2,6 +2,7 @@ package handler
 
 import (
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/saptaka/pos/utils"
@@ -19,6 +20,7 @@ func (s service) GetPasscode(id int64) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	dataPasscode := make(map[string]interface{})
@@ -31,6 +33,7 @@ func (s service) VerifyLogin(id int64, passcode, token string) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	if cashierPasscode != passcode {
@@ -46,6 +49,7 @@ func (s service) VerifyLogout(id int64, passcode string) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	if cashierPasscode == passcode {

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/saptaka/pos/model"
@@ -19,6 +20,14 @@ type Category interface {
 
 func (s service) ListCategory(limit, skip int) ([]byte, int) {
 	categories, err := s.db.GetCategories(context.Background(), limit, skip)
+
+	if err == sql.ErrNoRows {
+		return utils.ResponseWrapper(http.StatusNotFound, nil)
+	}
+	if err != nil {
+		log.Println(err)
+		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+	}
 	listCashier := model.ListCategory{
 		Categories: categories,
 		Meta: model.Meta{
@@ -26,12 +35,6 @@ func (s service) ListCategory(limit, skip int) ([]byte, int) {
 			Limit: limit,
 			Skip:  skip,
 		},
-	}
-	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
-	}
-	if err != nil {
-		return utils.ResponseWrapper(http.StatusInternalServerError, listCashier)
 	}
 	return utils.ResponseWrapper(http.StatusOK, listCashier)
 }
@@ -42,6 +45,7 @@ func (s service) DetailCategory(id int) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, category)
@@ -50,10 +54,12 @@ func (s service) DetailCategory(id int) ([]byte, int) {
 func (s service) CreateCategory(category model.Category) ([]byte, int) {
 	err := s.validation.Struct(category)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	CategoryData, err := s.db.CreateCategory(s.ctx, category.Name)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, CategoryData)
 	}
 	return utils.ResponseWrapper(http.StatusOK, CategoryData)
@@ -62,6 +68,7 @@ func (s service) CreateCategory(category model.Category) ([]byte, int) {
 func (s service) UpdateCategory(category model.Category) ([]byte, int) {
 	err := s.validation.Struct(category)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	err = s.db.UpdateCategory(s.ctx, category)
@@ -69,6 +76,7 @@ func (s service) UpdateCategory(category model.Category) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)
@@ -80,6 +88,7 @@ func (s service) DeleteCategory(id int) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)

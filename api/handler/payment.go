@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/saptaka/pos/model"
@@ -28,6 +29,7 @@ func (s service) ListPayment(limit, skip int) ([]byte, int) {
 		},
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, listPayment)
 	}
 	return utils.ResponseWrapper(http.StatusOK, listPayment)
@@ -39,6 +41,7 @@ func (s service) DetailPayment(id int64) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, payment)
@@ -47,6 +50,7 @@ func (s service) DetailPayment(id int64) ([]byte, int) {
 func (s service) CreatePayment(payment model.Payment) ([]byte, int) {
 	err := s.validation.Struct(payment)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if !model.PaymentType[payment.Type] {
@@ -55,6 +59,7 @@ func (s service) CreatePayment(payment model.Payment) ([]byte, int) {
 
 	paymentData, err := s.db.CreatePayment(s.ctx, payment)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, paymentData)
 	}
 	return utils.ResponseWrapper(http.StatusOK, paymentData)
@@ -63,6 +68,7 @@ func (s service) CreatePayment(payment model.Payment) ([]byte, int) {
 func (s service) UpdatePayment(payment model.Payment) ([]byte, int) {
 	err := s.validation.Struct(payment)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if !model.PaymentType[payment.Type] {
@@ -70,6 +76,7 @@ func (s service) UpdatePayment(payment model.Payment) ([]byte, int) {
 	}
 	err = s.db.UpdatePayment(s.ctx, payment)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)

@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"database/sql"
+	"log"
 	"net/http"
 
 	"github.com/saptaka/pos/model"
@@ -19,6 +20,10 @@ type Cashier interface {
 
 func (s service) ListCashier(limit, skip int) ([]byte, int) {
 	cashiers, err := s.db.GetCashiers(context.Background(), limit, skip)
+	if err != nil {
+		log.Println(err)
+		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+	}
 	listCashier := model.ListCashier{
 		Cashiers: cashiers,
 		Meta: model.Meta{
@@ -28,6 +33,7 @@ func (s service) ListCashier(limit, skip int) ([]byte, int) {
 		},
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, listCashier)
 	}
 	return utils.ResponseWrapper(http.StatusOK, listCashier)
@@ -39,6 +45,7 @@ func (s service) DetailCashier(id int64) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, cashier)
@@ -47,10 +54,12 @@ func (s service) DetailCashier(id int64) ([]byte, int) {
 func (s service) CreateCashier(cashierDetail model.Cashier) ([]byte, int) {
 	err := s.validation.Struct(cashierDetail)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	cashier, err := s.db.CreateCashier(s.ctx, cashierDetail.Name, cashierDetail.Passcode)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, cashier)
 	}
 	return utils.ResponseWrapper(http.StatusOK, cashier)
@@ -66,6 +75,7 @@ func (s service) UpdateCashier(cashierDetail model.Cashier) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)
@@ -77,6 +87,7 @@ func (s service) DeleteCashier(id int64) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)
