@@ -3,7 +3,7 @@ package model
 import "time"
 
 type Product struct {
-	ProductId  int64      `json:"productId" validate:"required"`
+	ProductId  int64      `json:"productId"`
 	Name       string     `json:"name" validate:"required"`
 	SKU        string     `json:"sku,,omitempty"`
 	Stock      int        `json:"stock,omitempty" validate:"required"`
