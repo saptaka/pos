@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -178,13 +179,15 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 		return productDetail, err
 	}
 
-	updateQuery := `UPDATE products 
+	go func() {
+		updateQuery := `UPDATE products 
 				SET sku=CONCAT('ID',LPAD(?,3,0))
 				WHERE id=?`
-	_, err = r.db.ExecContext(ctx, updateQuery, id, id)
-	if err != nil {
-		return productDetail, err
-	}
+		_, err = r.db.ExecContext(ctx, updateQuery, id, id)
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 
 	productDetail = model.Product{
 		ProductId:  id,
