@@ -90,7 +90,7 @@ func (r *router) UpdateProduct(res http.ResponseWriter, req *http.Request) {
 	idParams := params["productId"]
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
 		if statusCode != http.StatusOK {
 			res.WriteHeader(statusCode)
 			res.Write(response)

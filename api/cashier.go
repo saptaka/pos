@@ -89,7 +89,7 @@ func (r *router) UpdateCashier(res http.ResponseWriter, req *http.Request) {
 	idParams := params["cashierId"]
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
 		res.WriteHeader(statusCode)
 		res.Write(response)
 		res.Write(response)
@@ -120,7 +120,7 @@ func (r *router) DeleteCashier(res http.ResponseWriter, req *http.Request) {
 	idParams := params["cashierId"]
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
 		res.WriteHeader(statusCode)
 		res.Write(response)
 		return

@@ -89,7 +89,7 @@ func (r *router) UpdateCategory(res http.ResponseWriter, req *http.Request) {
 	idParams := params["categoryId"]
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
 		res.WriteHeader(statusCode)
 		res.Write(response)
 		return
@@ -119,7 +119,7 @@ func (r *router) DeleteCategory(res http.ResponseWriter, req *http.Request) {
 	idParams := params["categoryId"]
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
 		res.WriteHeader(statusCode)
 		res.Write(response)
 		return

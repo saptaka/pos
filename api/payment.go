@@ -88,7 +88,7 @@ func (r *router) UpdatePayment(res http.ResponseWriter, req *http.Request) {
 	idParams := params["paymentId"]
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
 		res.WriteHeader(statusCode)
 		res.Write(response)
 		return
