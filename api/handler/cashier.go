@@ -43,7 +43,7 @@ func (s service) ListCashier(limit, skip int) ([]byte, int) {
 func (s service) DetailCashier(id int64) ([]byte, int) {
 	cashier, err := s.db.GetCashierByID(context.Background(), id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)
@@ -74,7 +74,7 @@ func (s service) UpdateCashier(cashierDetail model.Cashier) ([]byte, int) {
 
 	err := s.db.UpdateCashier(s.ctx, cashierDetail)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)
@@ -86,7 +86,7 @@ func (s service) UpdateCashier(cashierDetail model.Cashier) ([]byte, int) {
 func (s service) DeleteCashier(id int64) ([]byte, int) {
 	err := s.db.DeleteCashier(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)

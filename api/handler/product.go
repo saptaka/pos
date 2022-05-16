@@ -38,7 +38,7 @@ func (s service) ListProduct(limit, skip int, query string) ([]byte, int) {
 func (s service) DetailProduct(id int) ([]byte, int) {
 	Product, err := s.db.GetProductByID(context.Background(), id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)
@@ -65,7 +65,7 @@ func (s service) CreateProduct(productRequest model.Product) ([]byte, int) {
 func (s service) UpdateProduct(product model.Product) ([]byte, int) {
 	err := s.db.UpdateProduct(s.ctx, product)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)

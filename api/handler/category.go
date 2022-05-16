@@ -22,7 +22,7 @@ func (s service) ListCategory(limit, skip int) ([]byte, int) {
 	categories, err := s.db.GetCategories(context.Background(), limit, skip)
 
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)
@@ -42,7 +42,7 @@ func (s service) ListCategory(limit, skip int) ([]byte, int) {
 func (s service) DetailCategory(id int) ([]byte, int) {
 	category, err := s.db.GetCategoryByID(context.Background(), id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)
@@ -69,7 +69,7 @@ func (s service) UpdateCategory(category model.Category) ([]byte, int) {
 
 	err := s.db.UpdateCategory(s.ctx, category)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)
@@ -81,7 +81,7 @@ func (s service) UpdateCategory(category model.Category) ([]byte, int) {
 func (s service) DeleteCategory(id int) ([]byte, int) {
 	err := s.db.DeleteCategory(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)

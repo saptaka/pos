@@ -18,7 +18,7 @@ type Login interface {
 func (s service) GetPasscode(id int64) ([]byte, int) {
 	passcode, err := s.db.GetPasscodeById(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)
@@ -31,7 +31,7 @@ func (s service) GetPasscode(id int64) ([]byte, int) {
 func (s service) VerifyLogin(id int64, passcode, token string) ([]byte, int) {
 	cashierPasscode, err := s.db.GetPasscodeById(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)
@@ -47,7 +47,7 @@ func (s service) VerifyLogin(id int64, passcode, token string) ([]byte, int) {
 func (s service) VerifyLogout(id int64, passcode string) ([]byte, int) {
 	cashierPasscode, err := s.db.GetPasscodeById(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)

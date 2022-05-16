@@ -69,8 +69,18 @@ func (r repo) GetPayments(ctx context.Context,
 func (r repo) UpdatePayment(ctx context.Context,
 	payment model.Payment) error {
 	query := "UPDATE payments SET name=?, types=?, logo=? ,updated_at=CURRENT_TIMESTAMP() WHERE id=?"
-	_, err := r.db.ExecContext(ctx, query, payment.Name, payment.Type, payment.Logo,
+	result, err := r.db.ExecContext(ctx, query, payment.Name, payment.Type, payment.Logo,
 		payment.PaymentId)
+	if err != nil {
+		return sql.ErrNoRows
+	}
+	rowaffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowaffected == 0 {
+		return sql.ErrNoRows
+	}
 	return err
 }
 

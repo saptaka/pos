@@ -39,7 +39,7 @@ func (s service) ListPayment(limit, skip int) ([]byte, int) {
 func (s service) DetailPayment(id int64) ([]byte, int) {
 	payment, err := s.db.GetPaymentByID(context.Background(), id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)
@@ -69,7 +69,7 @@ func (s service) CreatePayment(payment model.Payment) ([]byte, int) {
 func (s service) UpdatePayment(payment model.Payment) ([]byte, int) {
 	err := s.db.UpdatePayment(s.ctx, payment)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if err != nil {
 		log.Println(err)
