@@ -140,18 +140,11 @@ func (r repo) UpdateProduct(ctx context.Context,
 func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.Product, error) {
 
 	var productDetail model.Product
-	var discountId *int64
-	if product.Discount != nil {
-		discountIDResult, err := r.CreateDiscount(ctx, *product.Discount)
-		if err != nil {
-			return productDetail, err
-		}
-		discountId = &discountIDResult
-	}
+
 	insertQuery := `INSERT INTO 
 		products (name,image, price, stock, category_id, 
-			discount_id, updated_at, created_at) 
-	VALUES (?,?,?,?,?,?,?,?);`
+			 updated_at, created_at) 
+	VALUES (?,?,?,?,?,?,?);`
 
 	stmt, err := r.db.PrepareContext(ctx, insertQuery)
 	if err != nil {
@@ -166,7 +159,6 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 		product.Price,
 		product.Stock,
 		product.CategoryID,
-		discountId,
 		now,
 		now,
 	)
@@ -180,12 +172,22 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 	}
 
 	go func() {
+		var discountId int64
+		if product.Discount != nil {
+			discountIDResult, err := r.CreateDiscount(ctx, *product.Discount)
+			if err != nil {
+				log.Println(err)
+				return
+			}
+			discountId = discountIDResult
+		}
 		updateQuery := `UPDATE products 
-				SET sku=CONCAT('ID',LPAD(?,3,0))
+				SET sku=CONCAT('ID',LPAD(?,3,0)), discount_id=?
 				WHERE id=?`
-		_, err = r.db.ExecContext(ctx, updateQuery, id, id)
+		_, err = r.db.ExecContext(ctx, updateQuery, id, discountId, id)
 		if err != nil {
 			log.Println(err)
+			return
 		}
 	}()
 
