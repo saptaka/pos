@@ -7,12 +7,12 @@ type Response struct {
 
 type SuccessResponse struct {
 	Response
-	Data interface{} `json:"data"`
+	Data interface{} `json:"data,omitempty"`
 }
 
 type ErrorResponse struct {
 	Response
-	Error interface{} `json:"error"`
+	Error interface{} `json:"error,omitempty"`
 }
 
 type Meta struct {
