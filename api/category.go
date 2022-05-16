@@ -87,7 +87,7 @@ func (r *router) CreateCategory(res http.ResponseWriter, req *http.Request) {
 func (r *router) UpdateCategory(res http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	idParams := params["categoryId"]
-	id, _ := strconv.Atoi(idParams)
+	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
 		res.WriteHeader(statusCode)
@@ -103,7 +103,7 @@ func (r *router) UpdateCategory(res http.ResponseWriter, req *http.Request) {
 		res.Write(response)
 		return
 	}
-	category.CategoryId = int64(id)
+	category.CategoryId = id
 	response, statusCode := r.handlerService.UpdateCategory(category)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
