@@ -20,6 +20,10 @@ type Payment interface {
 
 func (s service) ListPayment(limit, skip int) ([]byte, int) {
 	Payments, err := s.db.GetPayments(context.Background(), limit, skip)
+	if err != nil {
+		log.Println(err)
+		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+	}
 	listPayment := model.ListPayment{
 		Payments: Payments,
 		Meta: model.Meta{
@@ -28,10 +32,7 @@ func (s service) ListPayment(limit, skip int) ([]byte, int) {
 			Skip:  skip,
 		},
 	}
-	if err != nil {
-		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, listPayment)
-	}
+
 	return utils.ResponseWrapper(http.StatusOK, listPayment)
 }
 
