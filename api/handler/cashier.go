@@ -58,6 +58,10 @@ func (s service) CreateCashier(cashierDetail model.Cashier) ([]byte, int) {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
+	_, err = strconv.Atoi(cashierDetail.Passcode)
+	if err != nil {
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+	}
 	cashier, err := s.db.CreateCashier(s.ctx, cashierDetail.Name, cashierDetail.Passcode)
 	if err != nil {
 		log.Println(err)
@@ -68,11 +72,7 @@ func (s service) CreateCashier(cashierDetail model.Cashier) ([]byte, int) {
 
 func (s service) UpdateCashier(cashierDetail model.Cashier) ([]byte, int) {
 
-	_, err := strconv.Atoi(cashierDetail.Passcode)
-	if err != nil {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
-	}
-	err = s.db.UpdateCashier(s.ctx, cashierDetail)
+	err := s.db.UpdateCashier(s.ctx, cashierDetail)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
