@@ -14,7 +14,6 @@ type Repo interface {
 	PaymentRepo
 	OrderRepo
 	ReportRepo
-	RevenueRepo
 	SetupTableStructure()
 }
 

@@ -12,7 +12,11 @@ type Report interface {
 }
 
 func (s service) Revenue() ([]byte, int) {
-	return utils.ResponseWrapper(http.StatusAccepted, "haha")
+	revenue, err := s.db.GetRevenues(s.ctx)
+	if err != nil {
+		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+	}
+	return utils.ResponseWrapper(http.StatusOK, revenue)
 }
 
 func (s service) Solds() ([]byte, int) {
