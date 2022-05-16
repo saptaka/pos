@@ -65,7 +65,7 @@ func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int
 
 	products, err := s.db.GetProductsByIds(s.ctx, productIds)
 	if err != nil {
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	orderedProductDetails, totalPrice := s.generateOrderedProduct(products, mapProductQty)
 	subTotalOrder := model.SubTotalOrder{
