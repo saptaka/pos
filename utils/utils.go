@@ -14,15 +14,12 @@ const (
 
 func ResponseWrapper(statusCode int, data interface{}) ([]byte, int) {
 
-	var status bool
-	var message string
 	if statusCode != http.StatusOK {
-		status = false
-		message = Error
+
 		response := model.ErrorResponse{
 			Response: model.Response{
-				Success: status,
-				Message: message,
+				Success: false,
+				Message: Error,
 			},
 			Error: "error",
 		}
@@ -32,12 +29,11 @@ func ResponseWrapper(statusCode int, data interface{}) ([]byte, int) {
 		}
 		return jsonData, statusCode
 	}
-	status = true
-	message = Success
+
 	response := model.SuccessResponse{
 		Response: model.Response{
-			Success: status,
-			Message: message,
+			Success: true,
+			Message: Success,
 		},
 		Data: data,
 	}
