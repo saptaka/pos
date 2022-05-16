@@ -30,7 +30,11 @@ func (r repo) GetCashierByID(ctx context.Context, id int64) (model.Cashier, erro
 
 func (r repo) GetCashiers(ctx context.Context,
 	limit, skip int) ([]model.Cashier, error) {
-	query := "SELECT id, name FROM cashiers limit ? offset ?"
+	query := "SELECT id, name FROM cashiers "
+	if limit > 0 {
+		query += " limit ? offset ?;"
+	}
+
 	rows, err := r.db.QueryContext(ctx, query, limit, skip)
 	if err == sql.ErrNoRows {
 		return nil, nil
