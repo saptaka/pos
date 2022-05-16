@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
@@ -67,6 +68,10 @@ func (s service) CreateCashier(cashierDetail model.Cashier) ([]byte, int) {
 
 func (s service) UpdateCashier(cashierDetail model.Cashier) ([]byte, int) {
 	err := s.validation.Struct(cashierDetail)
+	if err != nil {
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+	}
+	_, err = strconv.Atoi(cashierDetail.Passcode)
 	if err != nil {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
