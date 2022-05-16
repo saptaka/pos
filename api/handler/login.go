@@ -38,7 +38,7 @@ func (s service) VerifyLogin(id int64, passcode, token string) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	if cashierPasscode != passcode {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusForbidden, nil)
 	}
 	tokenData := make(map[string]interface{})
 	tokenData["token"] = token
