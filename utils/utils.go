@@ -33,7 +33,7 @@ func ResponseWrapper(statusCode int, data interface{}) ([]byte, int) {
 		return jsonData, statusCode
 	}
 	status = true
-	message = Error
+	message = Success
 	response := model.SuccessResponse{
 		Response: model.Response{
 			Success: status,
