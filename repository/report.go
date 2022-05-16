@@ -8,6 +8,7 @@ import (
 
 type ReportRepo interface {
 	GetRevenues(ctx context.Context) (model.Revenue, error)
+	GetSolds(ctx context.Context) (model.Solds, error)
 }
 
 func (r repo) GetRevenues(ctx context.Context) (model.Revenue, error) {
@@ -48,4 +49,38 @@ func (r repo) GetRevenues(ctx context.Context) (model.Revenue, error) {
 	}
 	revenue.TotalRevenue = totalRevenue
 	return revenue, nil
+}
+
+func (r repo) GetSolds(ctx context.Context) (model.Solds, error) {
+	query := `
+		SELECT
+		ordered_products.product_id,
+		products.name,
+		SUM(ordered_products.qty) as totalAQty,
+		SUM(total_normal_price) as totalAmount
+	FROM
+		ordered_products
+		JOIN products ON ordered_products.product_id = products.id
+		GROUP BY ordered_products.product_id
+	`
+	var sold model.Solds
+	rows, err := r.db.QueryContext(ctx, query)
+	if err != nil {
+		return sold, err
+	}
+
+	for rows.Next() {
+		var soldProduct model.SoldProduct
+		err := rows.Scan(
+			&soldProduct.ProductId,
+			&soldProduct.Name,
+			&soldProduct.TotalQty,
+			&soldProduct.TotalAmount,
+		)
+		if err != nil {
+			return sold, nil
+		}
+		sold.OrderProduct = append(sold.OrderProduct, soldProduct)
+	}
+	return sold, nil
 }

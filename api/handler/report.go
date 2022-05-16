@@ -20,5 +20,9 @@ func (s service) Revenue() ([]byte, int) {
 }
 
 func (s service) Solds() ([]byte, int) {
-	return utils.ResponseWrapper(http.StatusAccepted, "haha")
+	sold, err := s.db.GetSolds(s.ctx)
+	if err != nil {
+		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+	}
+	return utils.ResponseWrapper(http.StatusOK, sold)
 }
