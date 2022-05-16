@@ -28,14 +28,16 @@ func (r *router) GetPasscode(res http.ResponseWriter, req *http.Request) {
 	idParams := params["cashierId"]
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 
 	response, statusCode := r.handlerService.GetPasscode(id)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -47,20 +49,23 @@ func (r *router) VerifyLogin(res http.ResponseWriter, req *http.Request) {
 	idParams := params["cashierId"]
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	var cashier model.Cashier
 	err := json.NewDecoder(req.Body).Decode(&cashier)
 	if err != nil {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	response, statusCode := r.handlerService.VerifyLogin(id, cashier.Passcode, Token)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -72,20 +77,23 @@ func (r *router) VerifyLogout(res http.ResponseWriter, req *http.Request) {
 	idParams := params["cashierId"]
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	var cashier model.Cashier
 	err := json.NewDecoder(req.Body).Decode(&cashier)
 	if err != nil {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	response, statusCode := r.handlerService.VerifyLogout(id, cashier.Passcode)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")

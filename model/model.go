@@ -1,9 +1,18 @@
 package model
 
 type Response struct {
-	Success bool        `json:"success"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+	Success bool   `json:"success"`
+	Message string `json:"message"`
+}
+
+type SuccessResponse struct {
+	Response
+	Data interface{} `json:"data"`
+}
+
+type ErrorResponse struct {
+	Response
+	Error interface{} `json:"error"`
 }
 
 type Meta struct {

@@ -36,6 +36,7 @@ func (r *router) ListCategory(res http.ResponseWriter, req *http.Request) {
 	response, statusCode := r.handlerService.ListCategory(limit, skip)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -47,13 +48,15 @@ func (r *router) DetailCategory(res http.ResponseWriter, req *http.Request) {
 	idParams := params["categoryId"]
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	response, statusCode := r.handlerService.DetailCategory(id)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -65,14 +68,16 @@ func (r *router) CreateCategory(res http.ResponseWriter, req *http.Request) {
 	var category model.Category
 	err := json.NewDecoder(req.Body).Decode(&category)
 	if err != nil {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 
 	response, statusCode := r.handlerService.CreateCategory(category)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -84,22 +89,25 @@ func (r *router) UpdateCategory(res http.ResponseWriter, req *http.Request) {
 	idParams := params["categoryId"]
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 
 	var category model.Category
 	err := json.NewDecoder(req.Body).Decode(&category)
 	if err != nil {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	category.CategoryId = int64(id)
 	response, statusCode := r.handlerService.UpdateCategory(category)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -111,13 +119,15 @@ func (r *router) DeleteCategory(res http.ResponseWriter, req *http.Request) {
 	idParams := params["categoryId"]
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	response, statusCode := r.handlerService.DeleteCategory(id)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")

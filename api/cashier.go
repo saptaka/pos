@@ -36,6 +36,7 @@ func (r *router) ListCashier(res http.ResponseWriter, req *http.Request) {
 	response, statusCode := r.handlerService.ListCashier(limit, skip)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -47,13 +48,15 @@ func (r *router) DetailCashier(res http.ResponseWriter, req *http.Request) {
 	idParams := params["cashierId"]
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	response, statusCode := r.handlerService.DetailCashier(id)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -65,14 +68,16 @@ func (r *router) CreateCashier(res http.ResponseWriter, req *http.Request) {
 	var cashierRequest model.Cashier
 	err := json.NewDecoder(req.Body).Decode(&cashierRequest)
 	if err != nil {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 
 	response, statusCode := r.handlerService.CreateCashier(cashierRequest)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -84,22 +89,26 @@ func (r *router) UpdateCashier(res http.ResponseWriter, req *http.Request) {
 	idParams := params["cashierId"]
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
+		res.Write(response)
 		return
 	}
 
 	var cashierDetail model.Cashier
 	err := json.NewDecoder(req.Body).Decode(&cashierDetail)
 	if err != nil {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	cashierDetail.ChashierId = int64(id)
 	response, statusCode := r.handlerService.UpdateCashier(cashierDetail)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -111,13 +120,15 @@ func (r *router) DeleteCashier(res http.ResponseWriter, req *http.Request) {
 	idParams := params["cashierId"]
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	response, statusCode := r.handlerService.DeleteCashier(id)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")

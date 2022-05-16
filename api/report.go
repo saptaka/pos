@@ -20,6 +20,7 @@ func (r *router) Revenue(res http.ResponseWriter, req *http.Request) {
 	response, statusCode := r.handlerService.Revenue()
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -30,6 +31,7 @@ func (r *router) Solds(res http.ResponseWriter, req *http.Request) {
 	response, statusCode := r.handlerService.Solds()
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")

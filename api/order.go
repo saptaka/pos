@@ -38,6 +38,7 @@ func (r *router) ListOrder(res http.ResponseWriter, req *http.Request) {
 	response, statusCode := r.handlerService.ListOrder(limit, skip)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -49,13 +50,15 @@ func (r *router) DetailOrder(res http.ResponseWriter, req *http.Request) {
 	idParams := params["cashierId"]
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	response, statusCode := r.handlerService.DetailOrder(id)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -66,13 +69,15 @@ func (r *router) SubTotalOrder(res http.ResponseWriter, req *http.Request) {
 	var orderedProducts []model.OrderedProduct
 	err := json.NewDecoder(req.Body).Decode(&orderedProducts)
 	if err != nil {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	response, statusCode := r.handlerService.SubTotalOrder(orderedProducts)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -84,13 +89,15 @@ func (r *router) AddOrder(res http.ResponseWriter, req *http.Request) {
 	var addOrderRequest model.AddOrderRequest
 	err := json.NewDecoder(req.Body).Decode(&addOrderRequest)
 	if err != nil {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	response, statusCode := r.handlerService.AddOrder(addOrderRequest)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -102,13 +109,15 @@ func (r *router) DownloadOrder(res http.ResponseWriter, req *http.Request) {
 	idParams := params["cashierId"]
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		_, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	response, statusCode := r.handlerService.DownloadOrder(id)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
@@ -119,6 +128,7 @@ func (r *router) CheckOrderDownload(res http.ResponseWriter, req *http.Request) 
 	response, statusCode := r.handlerService.CheckOrderDownload()
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
 	res.Header().Set("Content-Type", "application/json")
