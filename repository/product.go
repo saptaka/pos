@@ -129,20 +129,39 @@ func (r repo) GetProducts(ctx context.Context,
 
 func (r repo) UpdateProduct(ctx context.Context,
 	Product model.Product) error {
-	query := `UPDATE products SET 
-			name=?, 
-			image=?,
-			stock=?,
-			price=?,
-			category_id=?,
-			updated_at=CURRENT_TIMESTAMP() WHERE id=?`
-	result, err := r.db.ExecContext(ctx, query,
-		Product.Name,
-		Product.Image,
-		Product.Stock,
-		Product.Price,
-		Product.CategoryID,
-		Product.ProductId)
+	query := `UPDATE products SET `
+	var countUpdate int
+	var values []interface{}
+	if Product.Name != "" {
+		countUpdate++
+		query += " name=?,"
+		values = append(values, Product.Name)
+	}
+	if Product.Image != "" {
+		query += " 	image=?,"
+		values = append(values, Product.Image)
+	}
+	if Product.Stock != 0 {
+		query += " 	stock=?,"
+		values = append(values, Product.Stock)
+	}
+	if Product.Price != 0 {
+		query += " price=?,"
+		values = append(values, Product.Price)
+	}
+	if Product.CategoryID != 0 {
+		query += " category_id=?,"
+		values = append(values, Product.CategoryID)
+	}
+
+	if countUpdate > 0 {
+		query += " updated_at=CURRENT_TIMESTAMP()  WHERE id=? "
+		values = append(values, Product.ProductId)
+	} else {
+		return fmt.Errorf("nothing updated")
+	}
+
+	result, err := r.db.ExecContext(ctx, query, values...)
 	if err != nil {
 		return err
 	}
