@@ -47,7 +47,7 @@ func (r *router) ListOrder(res http.ResponseWriter, req *http.Request) {
 
 func (r *router) DetailOrder(res http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
-	idParams := params["cashierId"]
+	idParams := params["orderId"]
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
