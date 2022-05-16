@@ -67,15 +67,11 @@ func (s service) CreatePayment(payment model.Payment) ([]byte, int) {
 }
 
 func (s service) UpdatePayment(payment model.Payment) ([]byte, int) {
-	err := s.validation.Struct(payment)
-	if err != nil {
-		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
-	}
+
 	if !model.PaymentType[payment.Type] {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
-	err = s.db.UpdatePayment(s.ctx, payment)
+	err := s.db.UpdatePayment(s.ctx, payment)
 	if err != nil {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)

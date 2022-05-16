@@ -66,12 +66,8 @@ func (s service) CreateCategory(category model.Category) ([]byte, int) {
 }
 
 func (s service) UpdateCategory(category model.Category) ([]byte, int) {
-	err := s.validation.Struct(category)
-	if err != nil {
-		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
-	}
-	err = s.db.UpdateCategory(s.ctx, category)
+
+	err := s.db.UpdateCategory(s.ctx, category)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
