@@ -190,10 +190,10 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 		return productDetail, err
 	}
 
-	go func() {
+	go func(repoInside repo, id int64, discount *model.Discount) {
 		var discountId int64
-		if product.Discount != nil {
-			discountIDResult, err := r.CreateDiscount(ctx, *product.Discount)
+		if discount != nil {
+			discountIDResult, err := repoInside.CreateDiscount(ctx, *discount)
 			if err != nil {
 				log.Println(err)
 				return
@@ -203,12 +203,12 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 		updateQuery := `UPDATE products 
 				SET sku=CONCAT('ID',LPAD(?,3,0)), discount_id=?
 				WHERE id=?`
-		_, err = r.db.ExecContext(ctx, updateQuery, id, discountId, id)
+		_, err = repoInside.db.ExecContext(ctx, updateQuery, id, discountId, id)
 		if err != nil {
 			log.Println(err)
 			return
 		}
-	}()
+	}(r, id, product.Discount)
 
 	productDetail = model.Product{
 		ProductId:  id,
