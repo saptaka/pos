@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/saptaka/pos/model"
 )
@@ -147,13 +148,16 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 		discountId = &discountIDResult
 	}
 	insertQuery := `INSERT INTO 
-		products (name,image, price, stock, category_id, discount_id) 
-	VALUES (?,?,?,?,?,?);`
+		products (name,image, price, stock, category_id, 
+			discount_id, updated_at, created_at) 
+	VALUES (?,?,?,?,?,?,?,?);`
 
 	stmt, err := r.db.PrepareContext(ctx, insertQuery)
 	if err != nil {
 		return productDetail, err
 	}
+
+	now := time.Now()
 
 	result, err := stmt.Exec(
 		product.Name,
@@ -162,6 +166,8 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 		product.Stock,
 		product.CategoryID,
 		discountId,
+		now,
+		now,
 	)
 	if err != nil {
 		return productDetail, err
@@ -180,28 +186,18 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 		return productDetail, err
 	}
 
-	selectQuery := `SELECT id, 
-					name,
-					category_id,
-					sku,
-					stock,
-					price,
-					image,
-					updated_at, 
-					created_at
-					FROM products 
-					WHERE id=?`
-	rows := r.db.QueryRowContext(ctx, selectQuery, id)
-	err = rows.Scan(
-		&productDetail.ProductId,
-		&productDetail.Name,
-		&productDetail.CategoryID,
-		&productDetail.SKU,
-		&productDetail.Stock,
-		&productDetail.Price,
-		&productDetail.Image,
-		&productDetail.UpdatedAt,
-		&productDetail.CreatedAt)
+	productDetail = model.Product{
+		ProductId:  id,
+		Name:       product.Name,
+		SKU:        "ID" + fmt.Sprintf("|%03d|", id),
+		Stock:      product.Stock,
+		Price:      product.Price,
+		Image:      product.Image,
+		CategoryID: product.CategoryID,
+		UpdatedAt:  &now,
+		CreatedAt:  &now,
+	}
+
 	return productDetail, err
 
 }
