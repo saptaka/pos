@@ -213,6 +213,9 @@ func (r repo) DeleteProduct(ctx context.Context, id int) error {
 }
 
 func (r repo) GetProductsByIds(ctx context.Context, ids []int64) ([]model.Product, error) {
+	if len(ids) == 0 {
+		return nil, sql.ErrNoRows
+	}
 	querySelect := `SELECT 
 				p.id,
 				p.name,
@@ -232,7 +235,10 @@ func (r repo) GetProductsByIds(ctx context.Context, ids []int64) ([]model.Produc
 		values = append(values, id)
 	}
 	template := "?"
-	template += strings.Repeat(",?", len(ids)-1)
+	if len(ids) > 1 {
+		template += strings.Repeat(",?", len(ids)-1)
+	}
+
 	querySelect = fmt.Sprintf(querySelect, template)
 	rows, err := r.db.QueryContext(ctx, querySelect, values...)
 	if err == sql.ErrNoRows {

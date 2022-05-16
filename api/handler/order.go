@@ -63,10 +63,6 @@ func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int
 		return orderRequest[i].ProductId < orderRequest[j].ProductId
 	})
 
-	if len(productIds) == 0 {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
-	}
-
 	products, err := s.db.GetProductsByIds(s.ctx, productIds)
 	if err != nil {
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
@@ -95,9 +91,6 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		return orderRequest.OrderedProduct[i].ProductId < orderRequest.OrderedProduct[j].ProductId
 	})
 
-	if len(productIds) == 0 {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
-	}
 	products, err := s.db.GetProductsByIds(s.ctx, productIds)
 	if err != nil {
 		log.Println(err)

@@ -183,7 +183,7 @@ func (r repo) GetDownloadStatus(ctx context.Context, id int64) (bool, error) {
 func (r repo) CreateOrderedProduct(ctx context.Context,
 	orderID int64,
 	orderRequests []model.OrderedProductDetail) error {
-	if len(orderRequests) <= 0 {
+	if len(orderRequests) == 0 {
 		return sql.ErrNoRows
 	}
 	query := `INSERT INTO ordered_products(
@@ -208,7 +208,9 @@ func (r repo) CreateOrderedProduct(ctx context.Context,
 		)
 	}
 	template := "(?,?,?,?,?,?,?)"
-	template += strings.Repeat(",(?,?,?,?,?,?,?)", len(orderRequests)-1)
+	if len(orderRequests) > 1 {
+		template += strings.Repeat(",?", len(orderRequests)-1)
+	}
 	query = fmt.Sprintf(query, template)
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
