@@ -183,7 +183,7 @@ func (r repo) GetDownloadStatus(ctx context.Context, id int64) (bool, error) {
 func (r repo) CreateOrderedProduct(ctx context.Context,
 	orderID int64,
 	orderRequests []model.OrderedProductDetail) error {
-	if len(orderRequests) == 0 {
+	if len(orderRequests) <= 0 {
 		return sql.ErrNoRows
 	}
 	query := `INSERT INTO ordered_products(

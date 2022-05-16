@@ -95,6 +95,9 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		return orderRequest.OrderedProduct[i].ProductId < orderRequest.OrderedProduct[j].ProductId
 	})
 
+	if len(productIds) == 0 {
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+	}
 	products, err := s.db.GetProductsByIds(s.ctx, productIds)
 	if err != nil {
 		log.Println(err)
