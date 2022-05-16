@@ -31,17 +31,27 @@ func (r repo) GetCashierByID(ctx context.Context, id int64) (model.Cashier, erro
 func (r repo) GetCashiers(ctx context.Context,
 	limit, skip int) ([]model.Cashier, error) {
 	query := "SELECT id, name FROM cashiers "
+	var rows *sql.Rows
+	var err error
 	if limit > 0 {
 		query += " limit ? offset ?;"
+		rows, err = r.db.QueryContext(ctx, query, limit, skip)
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		rows, err = r.db.QueryContext(ctx, query)
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	rows, err := r.db.QueryContext(ctx, query, limit, skip)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
-	}
 	var cashiers []model.Cashier
 	for rows.Next() {
 		var cashier model.Cashier

@@ -29,13 +29,26 @@ func (r repo) GetCategoryByID(ctx context.Context, id int) (model.Category, erro
 
 func (r repo) GetCategories(ctx context.Context,
 	limit, skip int) ([]model.Category, error) {
-	query := "SELECT id, name FROM categories limit ? offset ?"
-	rows, err := r.db.QueryContext(ctx, query, limit, skip)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
+	query := "SELECT id, name FROM categories "
+	var rows *sql.Rows
+	var err error
+	if limit > 0 {
+		query += " limit ? offset ?;"
+		rows, err = r.db.QueryContext(ctx, query, limit, skip)
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		rows, err = r.db.QueryContext(ctx, query)
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
 	}
 	var categories []model.Category
 	for rows.Next() {

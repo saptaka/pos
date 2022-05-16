@@ -30,13 +30,26 @@ func (r repo) GetPaymentByID(ctx context.Context, id int64) (model.Payment, erro
 
 func (r repo) GetPayments(ctx context.Context,
 	limit, skip int) ([]model.Payment, error) {
-	query := "SELECT id, name, types, logo FROM payments limit ? offset ?"
-	rows, err := r.db.QueryContext(ctx, query, limit, skip)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
+	query := "SELECT id, name, types, logo FROM payments "
+	var rows *sql.Rows
+	var err error
+	if limit > 0 {
+		query += " limit ? offset ?;"
+		rows, err = r.db.QueryContext(ctx, query, limit, skip)
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		rows, err = r.db.QueryContext(ctx, query)
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
 	}
 	var payments []model.Payment
 	for rows.Next() {

@@ -70,20 +70,39 @@ func (r repo) GetProducts(ctx context.Context,
 			FROM products p JOIN categories c 
 			ON p.category_id=c.id 
 			%s 
-			limit ? offset ?`
+			`
+
 	values := make([]interface{}, 0)
 	if query != "" {
 		withQuery = " WHERE p.name=?"
 		values = append(values, query)
 	}
 	querySelect = fmt.Sprintf(querySelect, withQuery)
-	values = append(values, limit, skip)
-	rows, err := r.db.QueryContext(ctx, querySelect, values...)
-	if err == sql.ErrNoRows {
-		return nil, nil
-	}
-	if err != nil {
-		return nil, err
+
+	var rows *sql.Rows
+	var err error
+	if limit > 0 {
+		values = append(values, limit, skip)
+		querySelect += " limit ? offset ?;"
+		rows, err = r.db.QueryContext(ctx, querySelect, values...)
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		if len(values) > 0 {
+			rows, err = r.db.QueryContext(ctx, querySelect, values...)
+		} else {
+			rows, err = r.db.QueryContext(ctx, querySelect)
+		}
+		if err == sql.ErrNoRows {
+			return nil, nil
+		}
+		if err != nil {
+			return nil, err
+		}
 	}
 	var products []model.Product
 	for rows.Next() {
