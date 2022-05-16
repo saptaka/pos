@@ -177,7 +177,6 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 		product.Image,
 		product.Price,
 		product.Stock,
-		product.CategoryID,
 		now,
 		now,
 	)
