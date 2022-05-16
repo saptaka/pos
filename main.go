@@ -9,6 +9,7 @@ import (
 func main() {
 	cfg := config.Setup()
 	repo := repository.NewRepository(cfg)
+	repo.SetupTableStructure()
 	service := server.NewServer(cfg, repo)
 	service.Listen(3030)
 }
