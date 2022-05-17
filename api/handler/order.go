@@ -92,7 +92,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 	products, err := s.db.GetProductsByIds(s.ctx, productIds)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	orderedProductDetails, totalPrice := s.generateOrderedProduct(products, mapProductQty)
 	now := time.Now()
@@ -108,12 +108,12 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 	order, err = s.db.CreateOrder(s.ctx, order)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	paymentType, err := s.getPaymentType(s.ctx, orderRequest.PaymentID)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	order.PaymentType = paymentType
 	return utils.ResponseWrapper(http.StatusOK, order)
