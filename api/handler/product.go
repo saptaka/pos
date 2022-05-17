@@ -57,7 +57,7 @@ func (s service) CreateProduct(productRequest model.Product) ([]byte, int) {
 	product, err := s.db.CreateProduct(s.ctx, productRequest)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, product)
+		return utils.ResponseWrapper(http.StatusBadRequest, product)
 	}
 	return utils.ResponseWrapper(http.StatusOK, product)
 }
