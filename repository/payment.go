@@ -17,10 +17,14 @@ type PaymentRepo interface {
 
 func (r repo) GetPaymentByID(ctx context.Context, id int64) (model.Payment, error) {
 	var payment model.Payment
-	query := `SELECT id, name, types, logo FROM payments WHERE id=?`
+	query := "SELECT id, name, types,logo FROM payments WHERE id=?"
 	rows := r.db.QueryRowContext(ctx, query, id)
 	err := rows.Scan(&payment.PaymentId, &payment.Name,
 		&payment.Type, &payment.Logo)
+
+	if err == sql.ErrNoRows {
+		return payment, err
+	}
 	if err != nil {
 		return payment, err
 	}
