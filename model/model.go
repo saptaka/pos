@@ -12,7 +12,7 @@ type SuccessResponse struct {
 
 type ErrorResponse struct {
 	Response
-	Error interface{} `json:"error,omitempty"`
+	Error interface{} `json:"error"`
 }
 
 type Meta struct {
