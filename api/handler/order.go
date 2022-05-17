@@ -77,10 +77,7 @@ func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int
 }
 
 func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
-	err := s.validation.Struct(orderRequest)
-	if err != nil {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
-	}
+
 	var productIds []int64
 	mapProductQty := make(map[int64]int)
 	for _, productItem := range orderRequest.OrderedProduct {
