@@ -72,7 +72,7 @@ func (r repo) SetupTableStructure() {
 		total_return int NOT NULL DEFAULT '0',
 		receipt_file_path varchar(255) CHARACTER SET utf8mb4  NOT NULL DEFAULT 'DEFAULT',
 		is_downloaded tinyint NOT NULL DEFAULT '0',
-		UNIQUE KEY id (id),
+		UNIQUE KEY id (id)
 	  ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 ; 
 	  `
 
@@ -103,7 +103,6 @@ func (r repo) SetupTableStructure() {
 		UNIQUE KEY id (id),
 		KEY product_name_idx (name) USING BTREE
 	  ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 ;
-	   
 	  `
 
 	orderedProductsTable := `
