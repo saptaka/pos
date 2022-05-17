@@ -76,6 +76,9 @@ func (s service) UpdateProduct(product model.Product) ([]byte, int) {
 
 func (s service) DeleteProduct(id int) ([]byte, int) {
 	err := s.db.DeleteProduct(s.ctx, id)
+	if err == sql.ErrNoRows {
+		return utils.ResponseWrapper(http.StatusNotFound, nil)
+	}
 	if err != nil {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
