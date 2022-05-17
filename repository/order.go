@@ -231,11 +231,16 @@ func (r repo) CreateOrder(ctx context.Context, orderRequest model.Order) (model.
 	if err != nil {
 		return orderRequest, err
 	}
-	orderRequest.OrderId = id
-	err = r.CreateOrderedProduct(ctx, id, orderRequest.OrderedProduct)
-	if err != nil {
-		return orderRequest, err
-	}
+
+	go func(id int64) {
+		orderRequest.OrderId = id
+		err = r.CreateOrderedProduct(ctx, id, orderRequest.OrderedProduct)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}(id)
+
 	return orderRequest, nil
 }
 
