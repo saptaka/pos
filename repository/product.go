@@ -129,6 +129,15 @@ func (r repo) GetProducts(ctx context.Context,
 
 func (r repo) UpdateProduct(ctx context.Context,
 	Product model.Product) error {
+	_, err := r.GetProductByID(ctx, int(Product.ProductId))
+	if err == sql.ErrNoRows {
+		return sql.ErrNoRows
+	}
+
+	if err != nil {
+		return err
+	}
+
 	query := `UPDATE products SET `
 	var countUpdate int
 	var values []interface{}
@@ -245,8 +254,28 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 }
 
 func (r repo) DeleteProduct(ctx context.Context, id int) error {
+	_, err := r.GetProductByID(ctx, id)
+	if err == sql.ErrNoRows {
+		return sql.ErrNoRows
+	}
+
+	if err != nil {
+		return err
+	}
 	query := "DELETE FROM products WHERE id=?"
-	_, err := r.db.ExecContext(ctx, query, id)
+	result, err := r.db.ExecContext(ctx, query, id)
+	if err != nil {
+		return err
+	}
+	rowAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+
+	if rowAffected == 0 {
+		return sql.ErrNoRows
+	}
+
 	return err
 }
 

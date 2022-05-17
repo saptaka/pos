@@ -107,9 +107,7 @@ func (r repo) SetupTableStructure() {
 		UNIQUE KEY id (id),
 		KEY fk_discount_id (discount_id),
 		KEY fk_category_id (category_id),
-		KEY product_name_idx (name) USING BTREE,
-		CONSTRAINT fk_category_id FOREIGN KEY (category_id) REFERENCES categories (id),
-		CONSTRAINT fk_discount_id FOREIGN KEY (discount_id) REFERENCES discounts (id)
+		KEY product_name_idx (name) USING BTREE
 	  ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 ;
 	   
 	  `

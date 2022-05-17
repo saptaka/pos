@@ -65,7 +65,7 @@ func (s service) CreateProduct(productRequest model.Product) ([]byte, int) {
 func (s service) UpdateProduct(product model.Product) ([]byte, int) {
 	err := s.db.UpdateProduct(s.ctx, product)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
 		log.Println(err)
