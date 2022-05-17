@@ -97,7 +97,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 	orderedProductDetails, totalPrice := s.generateOrderedProduct(products, mapProductQty)
 	now := time.Now()
 	order := model.Order{
-		PaymentID:      orderRequest.PaymentID,
+		PaymentID:      &orderRequest.PaymentID,
 		OrderedProduct: orderedProductDetails,
 		TotalPaid:      orderRequest.TotalPaid,
 		TotalPrice:     totalPrice,

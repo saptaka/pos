@@ -86,7 +86,7 @@ func (r repo) GetProducts(ctx context.Context,
 		querySelect += " limit ? offset ?;"
 		rows, err = r.db.QueryContext(ctx, querySelect, values...)
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, sql.ErrNoRows
 		}
 		if err != nil {
 			return nil, err
@@ -98,7 +98,7 @@ func (r repo) GetProducts(ctx context.Context,
 			rows, err = r.db.QueryContext(ctx, querySelect)
 		}
 		if err == sql.ErrNoRows {
-			return nil, nil
+			return nil, sql.ErrNoRows
 		}
 		if err != nil {
 			return nil, err
@@ -309,7 +309,7 @@ func (r repo) GetProductsByIds(ctx context.Context, ids []int64) ([]model.Produc
 	querySelect = fmt.Sprintf(querySelect, template)
 	rows, err := r.db.QueryContext(ctx, querySelect, values...)
 	if err == sql.ErrNoRows {
-		return nil, nil
+		return nil, sql.ErrNoRows
 	}
 	if err != nil {
 		return nil, err

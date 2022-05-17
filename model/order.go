@@ -4,9 +4,9 @@ import "time"
 
 type Order struct {
 	OrderId           int64                  `json:"orderId"`
-	PaymentID         int64                  `json:"paymentId"`
+	PaymentID         *int64                 `json:"paymentId"`
 	CashierID         *int64                 `json:"cashierId"`
-	OrderedProduct    []OrderedProductDetail `json:"products"`
+	OrderedProduct    []OrderedProductDetail `json:"products,omitempty"`
 	TotalPaid         int                    `json:"totalPaid"`
 	TotalPrice        int                    `json:"totalPrice"`
 	TotalReturn       int                    `json:"totalReturn"`

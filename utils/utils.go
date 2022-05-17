@@ -21,7 +21,6 @@ func ResponseWrapper(statusCode int, data interface{}) ([]byte, int) {
 				Success: false,
 				Message: Error,
 			},
-			Error: "error",
 		}
 		jsonData, err := json.Marshal(response)
 		if err != nil {
