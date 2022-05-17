@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"sort"
+	"time"
 
 	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
@@ -97,25 +98,27 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
 	orderedProductDetails, totalPrice := s.generateOrderedProduct(products, mapProductQty)
-
-	paymentType, err := s.getPaymentType(s.ctx, orderRequest.PaymentID)
-	if err != nil {
-		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
-	}
+	now := time.Now()
 	order := model.Order{
 		PaymentID:      orderRequest.PaymentID,
 		OrderedProduct: orderedProductDetails,
 		TotalPaid:      orderRequest.TotalPaid,
 		TotalPrice:     totalPrice,
 		TotalReturn:    orderRequest.TotalPaid - totalPrice,
+		CreatedAt:      &now,
 	}
-	order.PaymentType = paymentType
+
 	order, err = s.db.CreateOrder(s.ctx, order)
 	if err != nil {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
 	}
+	paymentType, err := s.getPaymentType(s.ctx, orderRequest.PaymentID)
+	if err != nil {
+		log.Println(err)
+		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+	}
+	order.PaymentType = paymentType
 	return utils.ResponseWrapper(http.StatusOK, order)
 }
 

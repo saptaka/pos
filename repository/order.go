@@ -143,8 +143,8 @@ func (r repo) UpdateOrder() error {
 
 func (r repo) CreateOrder(ctx context.Context, orderRequest model.Order) (model.Order, error) {
 
-	query := `INSERT INTO orders(payment_type_id, total_price, total_paid, total_return)
-			VALUES (?,?,?,?);`
+	query := `INSERT INTO orders(payment_type_id, total_price, total_paid, total_return, created_at)
+			VALUES (?,?,?,?,?);`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return orderRequest, err
@@ -154,6 +154,7 @@ func (r repo) CreateOrder(ctx context.Context, orderRequest model.Order) (model.
 		orderRequest.TotalPrice,
 		orderRequest.TotalPaid,
 		orderRequest.TotalReturn,
+		orderRequest.CreatedAt,
 	)
 	if err != nil {
 		return orderRequest, err
