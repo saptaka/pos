@@ -1,11 +1,17 @@
 
-FROM golang:1.16
-WORKDIR /go/src/
+FROM golang:1.16-alpine
+
+WORKDIR /app
+
 COPY . ./
+
+RUN go mod download
+
 RUN CGO_ENABLED=0 GOOS=linux go build -o app .
 
-FROM alpine:latest  
 RUN apk --no-cache add ca-certificates
-WORKDIR /root/
-COPY --from=0 /go/src/app ./
+
+EXPOSE 3030
+
 CMD ["./app"]  
+
