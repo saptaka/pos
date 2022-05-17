@@ -11,7 +11,7 @@ func middleware(next func(res http.ResponseWriter, req *http.Request)) func(res 
 		// reqToken := req.Header.Get("Authorization")
 		// splitToken := strings.Split(reqToken, "Bearer ")
 		// if len(splitToken) < 2 {
-		// 	_, statusCode := utils.ResponseWrapper(http.StatusForbidden, nil)
+		// 	_, statusCode := utils.ResponseWrapper(http.StatusUnauthorized, nil)
 		// 	log.Println("unknown token")
 		// 	res.WriteHeader(statusCode)
 		// 	return
@@ -19,14 +19,14 @@ func middleware(next func(res http.ResponseWriter, req *http.Request)) func(res 
 		// reqToken = splitToken[1]
 
 		// if reqToken == "" {
-		// 	_, statusCode := utils.ResponseWrapper(http.StatusForbidden, nil)
+		// 	_, statusCode := utils.ResponseWrapper(http.StatusUnauthorized, nil)
 		// 	log.Println("unknown token")
 		// 	res.WriteHeader(statusCode)
 		// 	return
 		// }
 
 		// if reqToken != Token {
-		// 	_, statusCode := utils.ResponseWrapper(http.StatusForbidden, nil)
+		// 	_, statusCode := utils.ResponseWrapper(http.StatusUnauthorized, nil)
 		// 	log.Println("unknown token")
 		// 	res.WriteHeader(statusCode)
 		// }
