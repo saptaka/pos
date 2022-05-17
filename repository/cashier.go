@@ -20,7 +20,7 @@ func (r repo) GetCashierByID(ctx context.Context, id int64) (model.Cashier, erro
 	var cashier model.Cashier
 	query := "SELECT id, name FROM cashiers WHERE id=?"
 	rows := r.db.QueryRowContext(ctx, query, id)
-	err := rows.Scan(&cashier.ChashierId, &cashier.Name)
+	err := rows.Scan(&cashier.CashierId, &cashier.Name)
 	if err != nil {
 		return cashier, err
 	}
@@ -55,7 +55,7 @@ func (r repo) GetCashiers(ctx context.Context,
 	var cashiers []model.Cashier
 	for rows.Next() {
 		var cashier model.Cashier
-		err := rows.Scan(&cashier.ChashierId, &cashier.Name)
+		err := rows.Scan(&cashier.CashierId, &cashier.Name)
 		if err != nil {
 			return nil, err
 		}
@@ -74,7 +74,7 @@ func (r repo) UpdateCashier(ctx context.Context,
 	result, err := r.db.ExecContext(ctx, query,
 		cashierDetail.Name,
 		cashierDetail.Passcode,
-		cashierDetail.ChashierId)
+		cashierDetail.CashierId)
 	if err != nil {
 		return err
 	}
@@ -115,7 +115,7 @@ func (r repo) CreateCashier(ctx context.Context, name, passcode string) (model.C
 	rows := r.db.QueryRowContext(ctx, selectQuery, id)
 
 	err = rows.Scan(
-		&cashier.ChashierId,
+		&cashier.CashierId,
 		&cashier.Name,
 		&cashier.Passcode,
 		&cashier.UpdatedAt,

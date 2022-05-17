@@ -22,61 +22,115 @@ type OrderRepo interface {
 
 func (r repo) GetOrder(ctx context.Context, limit, skip int) ([]model.Order, error) {
 
-	querySelect := `
-			SELECT
-			o.id,
-			o.payment_type_id,
-			o.cashier_id,
-			o.total_price,
-			o.total_paid,
-			o.total_return,
-			o.receipt_id,
-			o.created_at,
-			COALESCE(c.name, '') as name,
-			p.logo,
-			p.name,
-			p.types
-		FROM
-			orders o
-			LEFT JOIN cashiers c ON o.cashier_id = c.id
-			LEFT JOIN payments p ON o.payment_type_id = p.id
-			LIMIT ? OFFSET ?;`
+	ordersChan := make(chan []model.Order)
 
-	rows, err := r.db.QueryContext(ctx, querySelect, limit, skip)
-	if err == sql.ErrNoRows {
-		return nil, sql.ErrNoRows
-	}
-	if err != nil {
-		return nil, err
-	}
-	var orders []model.Order
-	for rows.Next() {
-		var cashier model.Cashier
-		var payment model.Payment
-		var order model.Order
-		err := rows.Scan(
-			&order.OrderId,
-			&order.PaymentID,
-			&order.CashierID,
-			&order.TotalPrice,
-			&order.TotalPaid,
-			&order.TotalReturn,
-			&order.ReceiptID,
-			&order.CreatedAt,
-			&cashier.Name,
-			&payment.Logo,
-			&payment.Name,
-			&payment.Type,
-		)
-		if err != nil {
-			return orders, err
+	go func(orderChanData chan []model.Order) {
+		var rows *sql.Rows
+		var err error
+		query := `
+			SELECT 
+			id,
+			payment_type_id,
+			cashier_id,
+			total_price,
+			total_paid,
+			total_return,
+			receipt_id,
+			created_at
+			FROM 
+			orders `
+		if skip != 0 {
+			query += " LIMIT ? OFFSET ?;"
+			rows, err = r.db.QueryContext(ctx, query, limit, skip)
+			if err == sql.ErrNoRows {
+				orderChanData <- make([]model.Order, 0)
+				return
+			}
+			if err != nil {
+				orderChanData <- make([]model.Order, 0)
+				return
+			}
+		} else {
+			rows, err = r.db.QueryContext(ctx, query)
+			if err == sql.ErrNoRows {
+				orderChanData <- make([]model.Order, 0)
+				return
+			}
+			if err != nil {
+				orderChanData <- make([]model.Order, 0)
+				return
+			}
 		}
-		cashier.ChashierId = *order.CashierID
-		payment.PaymentId = *order.PaymentID
-		order.Cashier = cashier
-		order.PaymentType = payment
-		orders = append(orders, order)
+		var orders []model.Order
+		for rows.Next() {
+			var order model.Order
+			err := rows.Scan(
+				&order.OrderId,
+				&order.PaymentID,
+				&order.CashierID,
+				&order.TotalPrice,
+				&order.TotalPaid,
+				&order.TotalReturn,
+				&order.ReceiptID,
+				&order.CreatedAt,
+			)
+			if err == sql.ErrNoRows {
+				orderChanData <- make([]model.Order, 0)
+				return
+			}
+			if err != nil {
+				orderChanData <- make([]model.Order, 0)
+				return
+			}
+			orders = append(orders, order)
+		}
+		orderChanData <- orders
+	}(ordersChan)
+
+	cashierChan := make(chan []model.Cashier)
+	go func(cashierChanData chan []model.Cashier) {
+		cashiers, err := r.GetCashiers(ctx, 0, 0)
+		if err != nil {
+			cashierChan <- make([]model.Cashier, 0)
+			return
+		}
+		cashierChanData <- cashiers
+
+	}(cashierChan)
+
+	paymentChan := make(chan []model.Payment)
+	go func(paymentChanData chan []model.Payment) {
+		payments, err := r.GetPayments(ctx, 0, 0)
+		if err != nil {
+			paymentChanData <- make([]model.Payment, 0)
+			return
+		}
+		paymentChanData <- payments
+	}(paymentChan)
+
+	orders := <-ordersChan
+	cashiers := <-cashierChan
+	mapCashier := make(map[int64]model.Cashier)
+	for _, cashier := range cashiers {
+		mapCashier[cashier.CashierId] = cashier
+		cashiers = cashiers[1:]
 	}
+
+	payments := <-paymentChan
+	mapPayment := make(map[int64]model.Payment)
+	for _, payment := range payments {
+		mapPayment[payment.PaymentId] = payment
+		payments = payments[1:]
+	}
+	for index, order := range orders {
+		if order.CashierID != nil {
+			orders[index].Cashier = mapCashier[*order.CashierID]
+		}
+		if order.PaymentID != nil {
+			orders[index].PaymentType = mapPayment[*order.PaymentID]
+		}
+	}
+
 	return orders, nil
 }
 
@@ -118,25 +172,7 @@ func (r repo) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
 	cashierChan := make(chan model.Cashier)
 	if order.CashierID != nil {
 		go func(id int64, cashierChanData chan model.Cashier) {
-			querySelect := `
-		SELECT
-		id,name 
-		FROM 
-		cashier  
-		WHERE id=?;`
-
-			rows := r.db.QueryRowContext(ctx, querySelect, id)
-
-			var cashier model.Cashier
-			err := rows.Scan(
-				&cashier.ChashierId,
-				&cashier.Name,
-			)
-			if err == sql.ErrNoRows {
-				cashierChanData <- model.Cashier{}
-				log.Println("no cashier found")
-				return
-			}
+			cashier, err := r.GetCashierByID(ctx, id)
 			if err != nil {
 				cashierChanData <- model.Cashier{}
 				log.Println("error selecting cashier found")
@@ -150,34 +186,12 @@ func (r repo) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
 	}
 
 	paymentChan := make(chan model.Payment)
-
 	if order.PaymentID != nil {
-
 		go func(id int64, paymentChanData chan model.Payment) {
-			querySelect := `
-				SELECT
-				id,name, types, logo
-				FROM 
-				payments  
-				WHERE id=?;`
-
-			rows := r.db.QueryRowContext(ctx, querySelect, id)
-
-			var payment model.Payment
-			err := rows.Scan(
-				&payment.PaymentId,
-				&payment.Name,
-				&payment.Type,
-				&payment.Logo,
-			)
-			if err == sql.ErrNoRows {
-				paymentChanData <- model.Payment{}
-				log.Println("no payment found")
-				return
-			}
+			payment, err := r.GetPaymentByID(ctx, id)
 			if err != nil {
 				paymentChanData <- model.Payment{}
-				log.Println("error selecting payment found : ")
+				log.Println("error get payment found")
 				return
 			}
 			paymentChanData <- payment

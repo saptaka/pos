@@ -104,7 +104,7 @@ func (r *router) UpdateCashier(res http.ResponseWriter, req *http.Request) {
 		res.Write(response)
 		return
 	}
-	cashierDetail.ChashierId = int64(id)
+	cashierDetail.CashierId = int64(id)
 	response, statusCode := r.handlerService.UpdateCashier(cashierDetail)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)

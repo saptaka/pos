@@ -73,10 +73,6 @@ func (r repo) SetupTableStructure() {
 		receipt_file_path varchar(255) CHARACTER SET utf8mb4  NOT NULL DEFAULT 'DEFAULT',
 		is_downloaded tinyint NOT NULL DEFAULT '0',
 		UNIQUE KEY id (id),
-		KEY fk_cashier_id (cashier_id),
-		KEY fk_payment_type_id (payment_type_id),
-		CONSTRAINT fk_cashier_id FOREIGN KEY (cashier_id) REFERENCES cashiers (id),
-		CONSTRAINT fk_payment_type_id FOREIGN KEY (payment_type_id) REFERENCES payments (id)
 	  ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 ; 
 	  `
 
@@ -105,8 +101,6 @@ func (r repo) SetupTableStructure() {
 		updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		UNIQUE KEY id (id),
-		KEY fk_discount_id (discount_id),
-		KEY fk_category_id (category_id),
 		KEY product_name_idx (name) USING BTREE
 	  ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 ;
 	   
