@@ -33,6 +33,7 @@ func middleware(next func(res http.ResponseWriter, req *http.Request)) func(res 
 		// 	res.WriteHeader(statusCode)
 		// }
 
+		log.Println(req.Header)
 		bodyBytes, err := ioutil.ReadAll(req.Body)
 		if err != nil {
 			log.Println(err)
