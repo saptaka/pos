@@ -245,15 +245,6 @@ func (s service) generateOrderedProduct(
 	return orderedProductDetails, totalPrice
 }
 
-func (s service) getPaymentType(ctx context.Context, id int64) (model.Payment, error) {
-	var payment model.Payment
-	paymentData, err := s.db.GetPaymentByID(ctx, id)
-	if err != nil {
-		return payment, err
-	}
-	return paymentData, nil
-}
-
 func (s service) generateOrderID() string {
 	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
