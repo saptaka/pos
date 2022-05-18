@@ -29,7 +29,8 @@ func (r repo) GetProductByID(ctx context.Context, id int64) (model.Product, erro
 				stock,
 				price,
 				image,
-				category_id 
+				category_id,
+				sku 
 			FROM products 
 			WHERE id=?`
 	row := r.db.QueryRowContext(ctx, query, id)
@@ -40,6 +41,7 @@ func (r repo) GetProductByID(ctx context.Context, id int64) (model.Product, erro
 		&product.Price,
 		&product.Image,
 		&product.CategoryID,
+		&product.SKU,
 	)
 	if err != nil {
 		return product, err
@@ -66,7 +68,8 @@ func (r repo) GetProducts(ctx context.Context,
 				stock,
 				price,
 				image,
-				category_id 
+				category_id ,
+				sku 
 			FROM products 
 			%s 
 			`
@@ -117,6 +120,7 @@ func (r repo) GetProducts(ctx context.Context,
 				&product.Price,
 				&product.Image,
 				&product.CategoryID,
+				&product.SKU,
 			)
 			if err != nil {
 				log.Println("error get product ", err)
