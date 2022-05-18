@@ -31,7 +31,7 @@ func (s service) ListOrder(limit, skip int) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, orders)
 }
@@ -132,7 +132,7 @@ func (s service) DownloadOrder(id int64) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusNotFound, receiptPath)
 	}
 	if err != nil {
-		return utils.ResponseWrapper(http.StatusInternalServerError, receiptPath)
+		return utils.ResponseWrapper(http.StatusBadRequest, receiptPath)
 	}
 	return utils.ResponseWrapper(http.StatusOK, receiptPath)
 }

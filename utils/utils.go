@@ -2,6 +2,7 @@ package utils
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 
 	"github.com/saptaka/pos/model"
@@ -24,7 +25,8 @@ func ResponseWrapper(statusCode int, data interface{}) ([]byte, int) {
 		}
 		jsonData, err := json.Marshal(response)
 		if err != nil {
-			return nil, http.StatusInternalServerError
+			log.Println(err)
+			return nil, http.StatusBadRequest
 		}
 		return jsonData, statusCode
 	}
@@ -38,7 +40,8 @@ func ResponseWrapper(statusCode int, data interface{}) ([]byte, int) {
 	}
 	jsonData, err := json.Marshal(response)
 	if err != nil {
-		return nil, http.StatusInternalServerError
+		log.Println(err)
+		return nil, http.StatusBadRequest
 	}
 
 	return jsonData, statusCode

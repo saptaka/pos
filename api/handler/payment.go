@@ -22,7 +22,7 @@ func (s service) ListPayment(limit, skip int) ([]byte, int) {
 	Payments, err := s.db.GetPayments(context.Background(), limit, skip)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	listPayment := model.ListPayment{
 		Payments: Payments,
@@ -43,7 +43,7 @@ func (s service) DetailPayment(id int64) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, payment)
 }
@@ -61,7 +61,7 @@ func (s service) CreatePayment(payment model.Payment) ([]byte, int) {
 	paymentData, err := s.db.CreatePayment(s.ctx, payment)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, paymentData)
+		return utils.ResponseWrapper(http.StatusBadRequest, paymentData)
 	}
 	return utils.ResponseWrapper(http.StatusOK, paymentData)
 }
@@ -73,7 +73,7 @@ func (s service) UpdatePayment(payment model.Payment) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }
@@ -81,7 +81,7 @@ func (s service) UpdatePayment(payment model.Payment) ([]byte, int) {
 func (s service) DeletePayment(id int) ([]byte, int) {
 	err := s.db.DeletePayment(s.ctx, id)
 	if err != nil {
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }

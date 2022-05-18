@@ -30,7 +30,7 @@ func (s service) ListProduct(limit, skip int, query string) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, listProduct)
+		return utils.ResponseWrapper(http.StatusBadRequest, listProduct)
 	}
 	return utils.ResponseWrapper(http.StatusOK, listProduct)
 }
@@ -42,7 +42,7 @@ func (s service) DetailProduct(id int64) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, Product)
 }
@@ -81,7 +81,7 @@ func (s service) DeleteProduct(id int64) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }

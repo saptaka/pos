@@ -52,7 +52,7 @@ func (r *router) DetailOrder(res http.ResponseWriter, req *http.Request) {
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	re, err := regexp.Compile(`S[0-9]{3}[A-Z]{1}`)
 	if err != nil {
-		response, statusCode := utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
 		res.Write(response)
 		return

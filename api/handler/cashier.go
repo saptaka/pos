@@ -23,7 +23,7 @@ func (s service) ListCashier(limit, skip int) ([]byte, int) {
 	cashiers, err := s.db.GetCashiers(context.Background(), limit, skip)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	listCashier := model.ListCashier{
 		Cashiers: cashiers,
@@ -33,10 +33,7 @@ func (s service) ListCashier(limit, skip int) ([]byte, int) {
 			Skip:  skip,
 		},
 	}
-	if err != nil {
-		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, listCashier)
-	}
+
 	return utils.ResponseWrapper(http.StatusOK, listCashier)
 }
 
@@ -47,7 +44,7 @@ func (s service) DetailCashier(id int64) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, cashier)
 }
@@ -65,7 +62,7 @@ func (s service) CreateCashier(cashierDetail model.Cashier) ([]byte, int) {
 	cashier, err := s.db.CreateCashier(s.ctx, cashierDetail.Name, cashierDetail.Passcode)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, cashier)
+		return utils.ResponseWrapper(http.StatusBadRequest, cashier)
 	}
 	return utils.ResponseWrapper(http.StatusOK, cashier)
 }
@@ -78,7 +75,7 @@ func (s service) UpdateCashier(cashierDetail model.Cashier) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }
@@ -90,7 +87,7 @@ func (s service) DeleteCashier(id int64) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }

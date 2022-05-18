@@ -26,7 +26,7 @@ func (s service) ListCategory(limit, skip int) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	listCashier := model.ListCategory{
 		Categories: categories,
@@ -46,7 +46,7 @@ func (s service) DetailCategory(id int64) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, category)
 }
@@ -60,7 +60,7 @@ func (s service) CreateCategory(category model.Category) ([]byte, int) {
 	CategoryData, err := s.db.CreateCategory(s.ctx, category.Name)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, CategoryData)
+		return utils.ResponseWrapper(http.StatusBadRequest, CategoryData)
 	}
 	return utils.ResponseWrapper(http.StatusOK, CategoryData)
 }
@@ -73,7 +73,7 @@ func (s service) UpdateCategory(category model.Category) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }
@@ -85,7 +85,7 @@ func (s service) DeleteCategory(id int64) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }

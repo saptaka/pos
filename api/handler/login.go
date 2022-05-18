@@ -22,7 +22,7 @@ func (s service) GetPasscode(id int64) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	dataPasscode := make(map[string]interface{})
 	dataPasscode["passcode"] = passcode
@@ -35,7 +35,7 @@ func (s service) VerifyLogin(id int64, passcode, token string) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if cashierPasscode != passcode {
 		return utils.ResponseWrapper(http.StatusUnauthorized, nil)
@@ -51,7 +51,7 @@ func (s service) VerifyLogout(id int64, passcode string) ([]byte, int) {
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	if strings.Compare(cashierPasscode, passcode) == 0 {
 		return utils.ResponseWrapper(http.StatusOK, nil)
