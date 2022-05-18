@@ -23,8 +23,8 @@ type Discount struct {
 	Type            string      `json:"type" validate:"required"`
 	Result          int         `json:"result"`
 	ExpiratedAt     interface{} `json:"expiredAt,omitempty"`
-	ExpiredAtFormat string      `json:"expiratedAtFormat,omitempty"`
-	StringFormat    string      `json:"stringFormat,omitempty"`
+	ExpiredAtFormat string      `json:"expiratedAtFormat"`
+	StringFormat    string      `json:"stringFormat"`
 }
 
 type ListProduct struct {
