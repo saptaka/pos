@@ -136,7 +136,8 @@ func (r repo) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
 		total_paid,
 		total_return,
 		receipt_id,
-		created_at
+		created_at,
+		updated_at
 		FROM 
 		orders 
 		WHERE id=?;`
@@ -152,6 +153,7 @@ func (r repo) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
 		&order.TotalReturn,
 		&order.ReceiptID,
 		&order.CreatedAt,
+		&order.UpdatedAt,
 	)
 	if err != nil {
 		return order, err
@@ -185,7 +187,7 @@ func (r repo) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
 			paymentChanData <- payment
 		}(*order.PaymentID, paymentChan)
 	} else {
-		close(cashierChan)
+		close(paymentChan)
 	}
 	order.Cashier = <-cashierChan
 	order.PaymentType = <-paymentChan

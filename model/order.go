@@ -10,7 +10,7 @@ type Orders struct {
 type Order struct {
 	OrderId           int64      `json:"orderId"`
 	PaymentID         *int64     `json:"paymentTypesId"`
-	CashierID         *int64     `json:"cashierId"`
+	CashierID         *int64     `json:"cashierId,omitempty"`
 	TotalPaid         int        `json:"totalPaid"`
 	TotalPrice        int        `json:"totalPrice"`
 	TotalReturn       int        `json:"totalReturn"`
@@ -18,8 +18,8 @@ type Order struct {
 	ReceiptIDFilePath string     `json:"-"`
 	CreatedAt         *time.Time `json:"createdAt"`
 	UpdatedAt         *time.Time `json:"updatedAt"`
-	Cashier           Cashier    `json:"cashier"`
-	PaymentType       Payment    `json:"payment_type"`
+	Cashier           Cashier    `json:"cashier,omitempty"`
+	PaymentType       Payment    `json:"payment_type,omitempty"`
 }
 
 type OrderedProductDetail struct {
