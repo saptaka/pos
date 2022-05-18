@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"net/http"
+	"regexp"
 	"strconv"
 
 	"github.com/gorilla/mux"
@@ -49,13 +50,27 @@ func (r *router) DetailOrder(res http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	idParams := params["orderId"]
 	id, _ := strconv.ParseInt(idParams, 10, 0)
-	if id == 0 {
+	re, err := regexp.Compile(`S[0-9]{3}[A-Z]{1}`)
+	if err != nil {
+		response, statusCode := utils.ResponseWrapper(http.StatusInternalServerError, nil)
+		res.WriteHeader(statusCode)
+		res.Write(response)
+		return
+	}
+
+	isReceiptId := re.MatchString(idParams)
+	if id == 0 && !isReceiptId {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
 		res.Write(response)
 		return
 	}
-	response, statusCode := r.handlerService.DetailOrder(id)
+	var receiptId string
+	if isReceiptId {
+		receiptId = idParams
+	}
+
+	response, statusCode := r.handlerService.DetailOrder(id, receiptId)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
 		res.Write(response)

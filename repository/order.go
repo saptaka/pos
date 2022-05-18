@@ -13,6 +13,7 @@ import (
 type OrderRepo interface {
 	GetOrder(ctx context.Context, limit, skip int) ([]model.Order, error)
 	GetOrderByID(ctx context.Context, id int64) (model.Order, error)
+	GetOrderByReceiptID(ctx context.Context, receiptId string) (model.Order, error)
 	UpdateOrder() error
 	CreateOrder(ctx context.Context,
 		orderRequest model.Order) (model.Order, error)
@@ -205,14 +206,85 @@ func (r repo) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
 	return order, nil
 }
 
+func (r repo) GetOrderByReceiptID(ctx context.Context, receiptId string) (model.Order, error) {
+
+	querySelect := `
+		SELECT 
+		id,
+		payment_type_id,
+		cashier_id,
+		total_price,
+		total_paid,
+		total_return,
+		receipt_id,
+		created_at
+		FROM 
+		orders 
+		WHERE receipt_id=?;`
+
+	rows := r.db.QueryRowContext(ctx, querySelect, receiptId)
+	var order model.Order
+	err := rows.Scan(
+		&order.OrderId,
+		&order.PaymentID,
+		&order.CashierID,
+		&order.TotalPrice,
+		&order.TotalPaid,
+		&order.TotalReturn,
+		&order.ReceiptID,
+		&order.CreatedAt,
+	)
+	if err == sql.ErrNoRows {
+		return order, sql.ErrNoRows
+	}
+	if err != nil {
+		return order, err
+	}
+
+	cashierChan := make(chan model.Cashier)
+	if order.CashierID != nil {
+		go func(id int64, cashierChanData chan model.Cashier) {
+			cashier, err := r.GetCashierByID(ctx, id)
+			if err != nil {
+				cashierChanData <- model.Cashier{}
+				log.Println("error selecting cashier found")
+				return
+			}
+			cashierChanData <- cashier
+
+		}(*order.CashierID, cashierChan)
+	} else {
+		close(cashierChan)
+	}
+
+	paymentChan := make(chan model.Payment)
+	if order.PaymentID != nil {
+		go func(id int64, paymentChanData chan model.Payment) {
+			payment, err := r.GetPaymentByID(ctx, id)
+			if err != nil {
+				paymentChanData <- model.Payment{}
+				log.Println("error get payment found")
+				return
+			}
+			paymentChanData <- payment
+		}(*order.PaymentID, paymentChan)
+	} else {
+		close(cashierChan)
+	}
+	order.Cashier = <-cashierChan
+	order.PaymentType = <-paymentChan
+
+	return order, nil
+}
+
 func (r repo) UpdateOrder() error {
 	return nil
 }
 
 func (r repo) CreateOrder(ctx context.Context, orderRequest model.Order) (model.Order, error) {
 
-	query := `INSERT INTO orders(payment_type_id, total_price, total_paid, total_return, created_at)
-			VALUES (?,?,?,?,?);`
+	query := `INSERT INTO orders(payment_type_id, total_price, total_paid, total_return, created_at, receipt_id)
+			VALUES (?,?,?,?,?,?);`
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
 		return orderRequest, err
@@ -223,6 +295,7 @@ func (r repo) CreateOrder(ctx context.Context, orderRequest model.Order) (model.
 		orderRequest.TotalPaid,
 		orderRequest.TotalReturn,
 		orderRequest.CreatedAt,
+		orderRequest.ReceiptID,
 	)
 	if err != nil {
 		return orderRequest, err

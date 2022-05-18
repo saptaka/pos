@@ -66,11 +66,11 @@ func (r repo) SetupTableStructure() {
 		created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		cashier_id bigint unsigned DEFAULT NULL,
 		payment_type_id bigint unsigned DEFAULT NULL,
-		receipt_id varchar(255) CHARACTER SET utf8mb4  NOT NULL DEFAULT 'DEFAULT',
+		receipt_id varchar(255) CHARACTER SET utf8mb4  NOT NULL DEFAULT '',
 		total_price int NOT NULL DEFAULT '0',
 		total_paid int NOT NULL DEFAULT '0',
 		total_return int NOT NULL DEFAULT '0',
-		receipt_file_path varchar(255) CHARACTER SET utf8mb4  NOT NULL DEFAULT 'DEFAULT',
+		receipt_file_path varchar(255) CHARACTER SET utf8mb4  NOT NULL DEFAULT '',
 		is_downloaded tinyint NOT NULL DEFAULT '0',
 		UNIQUE KEY id (id)
 	  ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 ; 
@@ -92,10 +92,10 @@ func (r repo) SetupTableStructure() {
 	CREATE TABLE  IF NOT EXISTS products (
 		id bigint unsigned NOT NULL AUTO_INCREMENT,
 		name varchar(255) NOT NULL,
-		sku varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '',
+		sku varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL DEFAULT '' COMMENT '',
 		stock int DEFAULT NULL,
 		price int DEFAULT NULL,
-		image varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'DEFAULT',
+		image varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '',
 		discount_id bigint unsigned DEFAULT NULL,
 		category_id bigint unsigned DEFAULT NULL,
 		updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

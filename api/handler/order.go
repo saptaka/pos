@@ -16,7 +16,7 @@ import (
 
 type Order interface {
 	ListOrder(limit, skip int) ([]byte, int)
-	DetailOrder(id int64) ([]byte, int)
+	DetailOrder(id int64, receiptId string) ([]byte, int)
 	SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int)
 	AddOrder(product model.AddOrderRequest) ([]byte, int)
 	DownloadOrder(id int64) ([]byte, int)
@@ -36,8 +36,15 @@ func (s service) ListOrder(limit, skip int) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, orders)
 }
 
-func (s service) DetailOrder(id int64) ([]byte, int) {
-	order, err := s.db.GetOrderByID(s.ctx, id)
+func (s service) DetailOrder(id int64, receiptId string) ([]byte, int) {
+	var order model.Order
+	var err error
+	if id != 0 {
+		order, err = s.db.GetOrderByID(s.ctx, id)
+	} else {
+		order, err = s.db.GetOrderByReceiptID(s.ctx, receiptId)
+	}
+
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
@@ -102,6 +109,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		TotalPrice:     totalPrice,
 		TotalReturn:    orderRequest.TotalPaid - totalPrice,
 		CreatedAt:      &now,
+		ReceiptID:      s.generateOrderID(),
 	}
 
 	order, err = s.db.CreateOrder(s.ctx, order)
