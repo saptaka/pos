@@ -1,6 +1,8 @@
 package api
 
 import (
+	"io/ioutil"
+	"log"
 	"net/http"
 )
 
@@ -30,6 +32,13 @@ func middleware(next func(res http.ResponseWriter, req *http.Request)) func(res 
 		// 	log.Println("unknown token")
 		// 	res.WriteHeader(statusCode)
 		// }
+
+		bodyBytes, err := ioutil.ReadAll(req.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+		bodyString := string(bodyBytes)
+		log.Println(bodyString)
 		next(res, req)
 	})
 }
