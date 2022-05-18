@@ -1,8 +1,6 @@
 package api
 
 import (
-	"io/ioutil"
-	"log"
 	"net/http"
 )
 
@@ -11,7 +9,7 @@ const Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NDkzMTU5NzksInN1
 func middleware(next func(res http.ResponseWriter, req *http.Request)) func(res http.ResponseWriter, req *http.Request) {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		// reqToken := req.Header.Get("Authorization")
-		// splitToken := strings.Split(reqToken, "Bearer ")
+		// splitToken := strings.Split(reqToken, "JWT ")
 		// if len(splitToken) < 2 {
 		// 	_, statusCode := utils.ResponseWrapper(http.StatusUnauthorized, nil)
 		// 	log.Println("unknown token")
@@ -31,17 +29,9 @@ func middleware(next func(res http.ResponseWriter, req *http.Request)) func(res 
 		// 	_, statusCode := utils.ResponseWrapper(http.StatusUnauthorized, nil)
 		// 	log.Println("unknown token")
 		// 	res.WriteHeader(statusCode)
+		// 	return
 		// }
 
-		log.Println(req.Header)
-		bodyBytes, err := ioutil.ReadAll(req.Body)
-		if err != nil {
-			log.Println(err)
-		}
-		bodyString := string(bodyBytes)
-		if bodyString != "" {
-			log.Println(bodyString)
-		}
 		next(res, req)
 	})
 }
