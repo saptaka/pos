@@ -22,7 +22,7 @@ type OrderRouter interface {
 }
 
 func (r *router) RouteOrderPath() {
-	r.mux.HandleFunc("/orders", middleware(r.ListOrder)).Methods("GET")
+	r.mux.HandleFunc("/orders", r.ListOrder).Methods("GET")
 	r.mux.HandleFunc("/orders/{orderId}", middleware(r.DetailOrder)).Methods("GET")
 	r.mux.HandleFunc("/orders/subtotal", middleware(r.SubTotalOrder)).Methods("POST")
 	r.mux.HandleFunc("/orders", middleware(r.AddOrder)).Methods("POST")
