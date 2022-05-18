@@ -13,8 +13,8 @@ type Product struct {
 	CategoryID *int64     `json:"categoryId,omitempty"`
 	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
 	CreatedAt  *time.Time `json:"createdAt,omitempty"`
-	Discount   *Discount  `json:"discount,omitempty"`
-	Category   *Category  `json:"category,omitempty"`
+	Discount   *Discount  `json:"discount"`
+	Category   *Category  `json:"category"`
 }
 
 type Discount struct {
