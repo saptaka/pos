@@ -14,7 +14,6 @@ type OrderRepo interface {
 	GetOrder(ctx context.Context, limit, skip int) ([]model.Order, error)
 	GetOrderByID(ctx context.Context, id int64) (model.Order, error)
 	GetOrderByReceiptID(ctx context.Context, receiptId string) (model.Order, error)
-	UpdateOrder() error
 	CreateOrder(ctx context.Context,
 		orderRequest model.Order) (model.Order, error)
 	DownloadReceipt(ctx context.Context, id int64) (string, error)
@@ -275,10 +274,6 @@ func (r repo) GetOrderByReceiptID(ctx context.Context, receiptId string) (model.
 	order.PaymentType = <-paymentChan
 
 	return order, nil
-}
-
-func (r repo) UpdateOrder() error {
-	return nil
 }
 
 func (r repo) CreateOrder(ctx context.Context, orderRequest model.Order) (model.Order, error) {
