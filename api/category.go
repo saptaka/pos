@@ -46,7 +46,7 @@ func (r *router) ListCategory(res http.ResponseWriter, req *http.Request) {
 func (r *router) DetailCategory(res http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	idParams := params["categoryId"]
-	id, _ := strconv.Atoi(idParams)
+	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
@@ -117,7 +117,7 @@ func (r *router) UpdateCategory(res http.ResponseWriter, req *http.Request) {
 func (r *router) DeleteCategory(res http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	idParams := params["categoryId"]
-	id, _ := strconv.Atoi(idParams)
+	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
 		res.WriteHeader(statusCode)

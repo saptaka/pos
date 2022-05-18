@@ -3,7 +3,9 @@ package handler
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"sort"
 	"time"
@@ -85,9 +87,6 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		mapProductQty[productItem.ProductId] = productItem.Qty
 		orderRequest.OrderedProduct = orderRequest.OrderedProduct[1:]
 	}
-	sort.Slice(orderRequest.OrderedProduct, func(i, j int) bool {
-		return orderRequest.OrderedProduct[i].ProductId < orderRequest.OrderedProduct[j].ProductId
-	})
 
 	products, err := s.db.GetProductsByIds(s.ctx, productIds)
 	if err != nil {
@@ -165,9 +164,8 @@ func (s service) generateOrderedProduct(
 		}
 		var finalPrice int
 		normalPrice := productItem.Price * productQty
-		var discountID *int
+
 		if productItem.Discount != nil {
-			discountID = &productItem.Discount.DiscountID
 			finalPrice = s.calculatePrice(*productItem.Discount,
 				productItem.Price,
 				productQty)
@@ -180,7 +178,7 @@ func (s service) generateOrderedProduct(
 			TotalFinalPrice:  finalPrice,
 			TotalNormalPrice: normalPrice,
 			Qty:              productQty,
-			DiscountID:       discountID,
+			DiscountID:       productItem.DiscountId,
 		}
 		orderedProductDetails = append(orderedProductDetails, orderedProductDetail)
 	}
@@ -195,4 +193,19 @@ func (s service) getPaymentType(ctx context.Context, id int64) (model.Payment, e
 		return payment, err
 	}
 	return paymentData, nil
+}
+
+func (s service) generateOrderID() string {
+	const letterBytes = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+	b := make([]byte, 1)
+	for i := range b {
+		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+	}
+	rand.Seed(time.Now().UnixNano())
+	min := 1
+	max := 999
+	middleDigit := fmt.Sprint(rand.Intn(max-min+1) + min)
+	return "S" + middleDigit + string(b)
+
 }

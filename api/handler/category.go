@@ -12,10 +12,10 @@ import (
 
 type Category interface {
 	ListCategory(limit, skip int) ([]byte, int)
-	DetailCategory(id int) ([]byte, int)
+	DetailCategory(id int64) ([]byte, int)
 	CreateCategory(Category model.Category) ([]byte, int)
 	UpdateCategory(Category model.Category) ([]byte, int)
-	DeleteCategory(id int) ([]byte, int)
+	DeleteCategory(id int64) ([]byte, int)
 }
 
 func (s service) ListCategory(limit, skip int) ([]byte, int) {
@@ -39,7 +39,7 @@ func (s service) ListCategory(limit, skip int) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, listCashier)
 }
 
-func (s service) DetailCategory(id int) ([]byte, int) {
+func (s service) DetailCategory(id int64) ([]byte, int) {
 	category, err := s.db.GetCategoryByID(context.Background(), id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
@@ -78,7 +78,7 @@ func (s service) UpdateCategory(category model.Category) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }
 
-func (s service) DeleteCategory(id int) ([]byte, int) {
+func (s service) DeleteCategory(id int64) ([]byte, int) {
 	err := s.db.DeleteCategory(s.ctx, id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)

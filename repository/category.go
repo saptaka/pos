@@ -8,14 +8,14 @@ import (
 )
 
 type CategoryRepo interface {
-	GetCategoryByID(ctx context.Context, id int) (model.Category, error)
+	GetCategoryByID(ctx context.Context, id int64) (model.Category, error)
 	GetCategories(ctx context.Context, limit, skip int) ([]model.Category, error)
 	UpdateCategory(ctx context.Context, category model.Category) error
 	CreateCategory(ctx context.Context, name string) (model.Category, error)
-	DeleteCategory(ctx context.Context, id int) error
+	DeleteCategory(ctx context.Context, id int64) error
 }
 
-func (r repo) GetCategoryByID(ctx context.Context, id int) (model.Category, error) {
+func (r repo) GetCategoryByID(ctx context.Context, id int64) (model.Category, error) {
 	var category model.Category
 	query := "SELECT id, name FROM categories WHERE id=?"
 	rows := r.db.QueryRowContext(ctx, query, id)
@@ -114,7 +114,7 @@ func (r repo) CreateCategory(ctx context.Context, name string) (model.Category, 
 
 }
 
-func (r repo) DeleteCategory(ctx context.Context, id int) error {
+func (r repo) DeleteCategory(ctx context.Context, id int64) error {
 	query := "DELETE FROM categories WHERE id=?"
 	result, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {

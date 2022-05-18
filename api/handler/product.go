@@ -12,10 +12,10 @@ import (
 
 type Product interface {
 	ListProduct(limit, skip int, query string) ([]byte, int)
-	DetailProduct(id int) ([]byte, int)
+	DetailProduct(id int64) ([]byte, int)
 	CreateProduct(product model.Product) ([]byte, int)
 	UpdateProduct(product model.Product) ([]byte, int)
-	DeleteProduct(id int) ([]byte, int)
+	DeleteProduct(id int64) ([]byte, int)
 }
 
 func (s service) ListProduct(limit, skip int, query string) ([]byte, int) {
@@ -35,7 +35,7 @@ func (s service) ListProduct(limit, skip int, query string) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, listProduct)
 }
 
-func (s service) DetailProduct(id int) ([]byte, int) {
+func (s service) DetailProduct(id int64) ([]byte, int) {
 	Product, err := s.db.GetProductByID(context.Background(), id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
@@ -74,7 +74,7 @@ func (s service) UpdateProduct(product model.Product) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }
 
-func (s service) DeleteProduct(id int) ([]byte, int) {
+func (s service) DeleteProduct(id int64) ([]byte, int) {
 	err := s.db.DeleteProduct(s.ctx, id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)

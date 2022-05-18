@@ -47,7 +47,7 @@ func (r *router) ListProduct(res http.ResponseWriter, req *http.Request) {
 func (r *router) DetailProduct(res http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	idParams := params["productId"]
-	id, _ := strconv.Atoi(idParams)
+	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)
@@ -88,17 +88,13 @@ func (r *router) CreateProduct(res http.ResponseWriter, req *http.Request) {
 func (r *router) UpdateProduct(res http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	idParams := params["productId"]
-	id, _ := strconv.Atoi(idParams)
+	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
-		if statusCode != http.StatusOK {
-			res.WriteHeader(statusCode)
-			res.Write(response)
-			return
-		}
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		res.WriteHeader(statusCode)
+		res.Write(response)
 		return
 	}
-
 	var product model.Product
 	err := json.NewDecoder(req.Body).Decode(&product)
 	if err != nil {
@@ -107,7 +103,7 @@ func (r *router) UpdateProduct(res http.ResponseWriter, req *http.Request) {
 		res.Write(response)
 		return
 	}
-	product.ProductId = int64(id)
+	product.ProductId = id
 	response, statusCode := r.handlerService.UpdateProduct(product)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
@@ -121,7 +117,7 @@ func (r *router) UpdateProduct(res http.ResponseWriter, req *http.Request) {
 func (r *router) DeleteProduct(res http.ResponseWriter, req *http.Request) {
 	params := mux.Vars(req)
 	idParams := params["productId"]
-	id, _ := strconv.Atoi(idParams)
+	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
 		res.WriteHeader(statusCode)

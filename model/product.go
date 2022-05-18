@@ -5,11 +5,12 @@ import "time"
 type Product struct {
 	ProductId  int64      `json:"productId"`
 	Name       string     `json:"name" validate:"required"`
-	SKU        string     `json:"sku,omitempty"`
 	Stock      int        `json:"stock,omitempty" validate:"required"`
 	Price      int        `json:"price" validate:"required"`
 	Image      string     `json:"image,omitempty"`
-	CategoryID int64      `json:"categoryId,omitempty"`
+	SKU        string     `json:"sku,omitempty"`
+	DiscountId *int64     `json:"-"`
+	CategoryID *int64     `json:"categoryId,omitempty"`
 	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
 	CreatedAt  *time.Time `json:"createdAt,omitempty"`
 	Discount   *Discount  `json:"discount,omitempty"`
@@ -17,7 +18,7 @@ type Product struct {
 }
 
 type Discount struct {
-	DiscountID      int         `json:"discountId,omitempty"`
+	DiscountID      int64       `json:"discountId,omitempty"`
 	Qty             int         `json:"qty" validate:"required"`
 	Type            string      `json:"type" validate:"required"`
 	Result          int         `json:"result"`

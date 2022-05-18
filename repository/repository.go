@@ -89,20 +89,19 @@ func (r repo) SetupTableStructure() {
 	  `
 
 	productsTable := `
-	  CREATE TABLE  IF NOT EXISTS products (
+	CREATE TABLE  IF NOT EXISTS products (
 		id bigint unsigned NOT NULL AUTO_INCREMENT,
 		name varchar(255) NOT NULL,
-		sku varchar(255) CHARACTER SET utf8mb4  DEFAULT NULL,
+		sku varchar(5) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci  NOT NULL COMMENT '',
 		stock int DEFAULT NULL,
 		price int DEFAULT NULL,
-		image varchar(255) CHARACTER SET utf8mb4  NOT NULL DEFAULT 'DEFAULT',
+		image varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'DEFAULT',
 		discount_id bigint unsigned DEFAULT NULL,
 		category_id bigint unsigned DEFAULT NULL,
 		updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		UNIQUE KEY id (id),
-		KEY product_name_idx (name) USING BTREE
-	  ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 ;
+		UNIQUE KEY id (id)
+	  ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 	  `
 
 	orderedProductsTable := `

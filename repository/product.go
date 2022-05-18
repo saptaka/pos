@@ -12,43 +12,48 @@ import (
 )
 
 type ProductRepo interface {
-	GetProductByID(ctx context.Context, id int) (model.Product, error)
+	GetProductByID(ctx context.Context, id int64) (model.Product, error)
 	GetProducts(ctx context.Context, limit, skip int, query string) ([]model.Product, error)
 	UpdateProduct(ctx context.Context, product model.Product) error
 	CreateProduct(ctx context.Context, product model.Product) (model.Product, error)
-	DeleteProduct(ctx context.Context, id int) error
+	DeleteProduct(ctx context.Context, id int64) error
 	GetProductsByIds(ctx context.Context, ids []int64) ([]model.Product, error)
 }
 
-func (r repo) GetProductByID(ctx context.Context, id int) (model.Product, error) {
+func (r repo) GetProductByID(ctx context.Context, id int64) (model.Product, error) {
 	var product model.Product
 	var category model.Category
 	query := `SELECT 
-				p.id,
-				p.name,
-				p.sku,
-				p.stock,
-				p.price,
-				p.image,
-				c.id,
-				c.name 
-			FROM products p JOIN categories c
-			ON p.category_id=c.id
-			WHERE p.id=?`
-	rows := r.db.QueryRowContext(ctx, query, id)
-	err := rows.Scan(
+				id,
+				name,
+				stock,
+				price,
+				image,
+				category_id 
+			FROM products 
+			WHERE id=?`
+	row := r.db.QueryRowContext(ctx, query, id)
+	err := row.Scan(
 		&product.ProductId,
 		&product.Name,
-		&product.SKU,
 		&product.Stock,
 		&product.Price,
 		&product.Image,
-		&category.CategoryId,
-		&category.Name,
+		&product.CategoryID,
 	)
-	product.Category = &category
+	if err == sql.ErrNoRows {
+		log.Println("no product found")
+		return product, err
+	}
 	if err != nil {
 		return product, err
+	}
+	if product.CategoryID != nil {
+		category, err = r.GetCategoryByID(ctx, *product.CategoryID)
+		if err != nil {
+			return product, err
+		}
+		product.Category = &category
 	}
 
 	return product, nil
@@ -56,80 +61,117 @@ func (r repo) GetProductByID(ctx context.Context, id int) (model.Product, error)
 
 func (r repo) GetProducts(ctx context.Context,
 	limit, skip int, query string) ([]model.Product, error) {
-	var withQuery string
 
-	querySelect := `SELECT 
-				p.id,
-				p.name,
-				p.sku,
-				p.stock,
-				p.price,
-				p.image,
-				c.id,
-				c.name 
-			FROM products p JOIN categories c 
-			ON p.category_id=c.id 
+	productChan := make(chan []model.Product)
+	go func(productChanData chan []model.Product) {
+		querySelect := `SELECT 
+				id,
+				name,
+				stock,
+				price,
+				image,
+				category_id 
+			FROM products 
 			%s 
 			`
-
-	values := make([]interface{}, 0)
-	if query != "" {
-		withQuery = " WHERE p.name=?"
-		values = append(values, query)
-	}
-	querySelect = fmt.Sprintf(querySelect, withQuery)
-
-	var rows *sql.Rows
-	var err error
-	if limit > 0 {
-		values = append(values, limit, skip)
-		querySelect += " limit ? offset ?;"
-		rows, err = r.db.QueryContext(ctx, querySelect, values...)
-		if err == sql.ErrNoRows {
-			return nil, sql.ErrNoRows
+		var withQuery string
+		values := make([]interface{}, 0)
+		if query != "" {
+			withQuery = " WHERE name=?"
+			values = append(values, query)
 		}
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		if len(values) > 0 {
+		querySelect = fmt.Sprintf(querySelect, withQuery)
+
+		var rows *sql.Rows
+		var err error
+		if limit > 0 {
+			values = append(values, limit, skip)
+			querySelect += " limit ? offset ?;"
 			rows, err = r.db.QueryContext(ctx, querySelect, values...)
+			if err == sql.ErrNoRows {
+				log.Println("no product found")
+				productChanData <- make([]model.Product, 0)
+				return
+			}
+			if err != nil {
+				log.Println("error get product ", err)
+				productChanData <- make([]model.Product, 0)
+				return
+			}
 		} else {
-			rows, err = r.db.QueryContext(ctx, querySelect)
+			if len(values) > 0 {
+				rows, err = r.db.QueryContext(ctx, querySelect, values...)
+			} else {
+				rows, err = r.db.QueryContext(ctx, querySelect)
+			}
+			if err == sql.ErrNoRows {
+				log.Println("no product found")
+				productChanData <- make([]model.Product, 0)
+				return
+			}
+			if err != nil {
+				log.Println("error get product ", err)
+				productChanData <- make([]model.Product, 0)
+				return
+			}
 		}
+		var products []model.Product
+		for rows.Next() {
+			var product model.Product
+			err := rows.Scan(
+				&product.ProductId,
+				&product.Name,
+				&product.Stock,
+				&product.Price,
+				&product.Image,
+				&product.CategoryID,
+			)
+			if err != nil {
+				log.Println("error get product ", err)
+				productChanData <- make([]model.Product, 0)
+				return
+			}
+			products = append(products, product)
+		}
+		productChanData <- products
+
+	}(productChan)
+
+	categoryChan := make(chan []model.Category)
+	go func(categoryChanData chan []model.Category) {
+		categories, err := r.GetCategories(ctx, 0, 0)
 		if err == sql.ErrNoRows {
-			return nil, sql.ErrNoRows
+			log.Println("no category found")
+			categoryChanData <- make([]model.Category, 0)
+			return
 		}
 		if err != nil {
-			return nil, err
+			log.Println("error get categories ", err)
+			categoryChanData <- make([]model.Category, 0)
+			return
+		}
+		categoryChanData <- categories
+	}(categoryChan)
+
+	products := <-productChan
+	categories := <-categoryChan
+	categoriesMap := make(map[int64]*model.Category)
+	for _, category := range categories {
+		categoriesMap[category.CategoryId] = &category
+		categories = categories[1:]
+	}
+	for index, product := range products {
+		if product.CategoryID != nil {
+			products[index].Category = categoriesMap[*product.CategoryID]
 		}
 	}
-	var products []model.Product
-	for rows.Next() {
-		var product model.Product
-		var category model.Category
-		err := rows.Scan(
-			&product.ProductId,
-			&product.Name,
-			&product.SKU,
-			&product.Stock,
-			&product.Price,
-			&product.Image,
-			&category.CategoryId,
-			&category.Name,
-		)
-		product.Category = &category
-		if err != nil {
-			return products, err
-		}
-		products = append(products, product)
-	}
+
 	return products, nil
 }
 
 func (r repo) UpdateProduct(ctx context.Context,
 	Product model.Product) error {
-	_, err := r.GetProductByID(ctx, int(Product.ProductId))
+	_, err := r.GetProductByID(ctx, Product.ProductId)
 	if err == sql.ErrNoRows {
 		return sql.ErrNoRows
 	}
@@ -158,7 +200,7 @@ func (r repo) UpdateProduct(ctx context.Context,
 		query += " price=?,"
 		values = append(values, Product.Price)
 	}
-	if Product.CategoryID != 0 {
+	if Product.CategoryID != nil && *Product.CategoryID != 0 {
 		query += " category_id=?,"
 		values = append(values, Product.CategoryID)
 	}
@@ -217,7 +259,7 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 		return productDetail, err
 	}
 
-	go func(repoInside repo, id, categoryId int64, discount *model.Discount) {
+	go func(repoInside repo, id int64, categoryId *int64, discount *model.Discount) {
 		var discountId int64
 		if discount != nil {
 			discountIDResult, err := repoInside.CreateDiscount(ctx, *discount)
@@ -228,9 +270,9 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 			discountId = discountIDResult
 		}
 		updateQuery := `UPDATE products 
-				SET sku=CONCAT('ID',LPAD(?,3,0)), discount_id=?, category_id=?
+				SET discount_id=?, category_id=?, sku=?
 				WHERE id=?`
-		_, err = repoInside.db.ExecContext(ctx, updateQuery, id, discountId, categoryId, id)
+		_, err = repoInside.db.ExecContext(ctx, updateQuery, discountId, categoryId, fmt.Sprintf("ID%03d", id), id)
 		if err != nil {
 			log.Println(err)
 			return
@@ -240,8 +282,8 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 	productDetail = model.Product{
 		ProductId:  id,
 		Name:       product.Name,
-		SKU:        "ID" + fmt.Sprintf("|%03d|", id),
 		Stock:      product.Stock,
+		SKU:        fmt.Sprintf("ID%03d", id),
 		Price:      product.Price,
 		Image:      product.Image,
 		CategoryID: product.CategoryID,
@@ -253,7 +295,7 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 
 }
 
-func (r repo) DeleteProduct(ctx context.Context, id int) error {
+func (r repo) DeleteProduct(ctx context.Context, id int64) error {
 	_, err := r.GetProductByID(ctx, id)
 	if err == sql.ErrNoRows {
 		return sql.ErrNoRows
@@ -284,19 +326,12 @@ func (r repo) GetProductsByIds(ctx context.Context, ids []int64) ([]model.Produc
 		return nil, sql.ErrNoRows
 	}
 	querySelect := `SELECT 
-				p.id,
-				p.name,
-				p.price,
-				d.id,
-				d.qty,
-				d.types,
-				d.result,
-				d.expired_at,
-				d.expired_at_format,
-				d.string_format
-			FROM products p JOIN discounts d 
-			ON p.discount_id=d.id 
-			WHERE p.id IN (%s) ORDER BY p.id ASC`
+				id,
+				name,
+				price,
+				discount_id  
+			FROM products 
+			WHERE id IN (%s) ORDER BY id ASC`
 	values := make([]interface{}, 0)
 	for _, id := range ids {
 		values = append(values, id)
@@ -317,25 +352,26 @@ func (r repo) GetProductsByIds(ctx context.Context, ids []int64) ([]model.Produc
 	var products []model.Product
 	for rows.Next() {
 		var product model.Product
-		var discount model.Discount
 		err := rows.Scan(
 			&product.ProductId,
 			&product.Name,
 			&product.Price,
-			&discount.DiscountID,
-			&discount.Qty,
-			&discount.Type,
-			&discount.Result,
-			&discount.ExpiratedAt,
-			&discount.ExpiredAtFormat,
-			&discount.StringFormat,
+			&product.DiscountId,
 		)
 		if err != nil {
 			return products, err
 		}
-		product.Discount = &discount
+		if product.DiscountId != nil {
+			discount, err := r.GetDiscountByID(ctx, *product.DiscountId)
+			if err != nil {
+				return products, err
+			}
+			product.Discount = &discount
+		}
+
 		products = append(products, product)
 	}
+
 	return products, nil
 }
 
@@ -374,4 +410,29 @@ func (r repo) CreateDiscount(ctx context.Context, discount model.Discount) (int6
 	}
 
 	return id, err
+}
+
+func (r repo) GetDiscountByID(ctx context.Context, id int64) (model.Discount, error) {
+	var discount model.Discount
+	query := `SELECT 
+			id,
+			qty,
+			types,
+			result,
+			expired_at,
+			expired_at_format,
+			string_format
+			FROM discounts  
+			WHERE id=?
+			`
+	err := r.db.QueryRowContext(ctx, query, id).Scan(
+		&discount.DiscountID,
+		&discount.Qty,
+		&discount.Type,
+		&discount.Result,
+		&discount.ExpiratedAt,
+		&discount.ExpiredAtFormat,
+		&discount.StringFormat,
+	)
+	return discount, err
 }
