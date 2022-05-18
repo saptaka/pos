@@ -41,10 +41,6 @@ func (r repo) GetProductByID(ctx context.Context, id int64) (model.Product, erro
 		&product.Image,
 		&product.CategoryID,
 	)
-	if err == sql.ErrNoRows {
-		log.Println("no product found")
-		return product, err
-	}
 	if err != nil {
 		return product, err
 	}
@@ -94,11 +90,6 @@ func (r repo) GetProducts(ctx context.Context,
 			values = append(values, limit, skip)
 			querySelect += " limit ? offset ?;"
 			rows, err = r.db.QueryContext(ctx, querySelect, values...)
-			if err == sql.ErrNoRows {
-				log.Println("no product found")
-				productChanData <- make([]model.Product, 0)
-				return
-			}
 			if err != nil {
 				log.Println("error get product ", err)
 				productChanData <- make([]model.Product, 0)
@@ -109,11 +100,6 @@ func (r repo) GetProducts(ctx context.Context,
 				rows, err = r.db.QueryContext(ctx, querySelect, values...)
 			} else {
 				rows, err = r.db.QueryContext(ctx, querySelect)
-			}
-			if err == sql.ErrNoRows {
-				log.Println("no product found")
-				productChanData <- make([]model.Product, 0)
-				return
 			}
 			if err != nil {
 				log.Println("error get product ", err)
@@ -146,11 +132,6 @@ func (r repo) GetProducts(ctx context.Context,
 	categoryChan := make(chan []model.Category)
 	go func(categoryChanData chan []model.Category) {
 		categories, err := r.GetCategories(ctx, 0, 0)
-		if err == sql.ErrNoRows {
-			log.Println("no category found")
-			categoryChanData <- make([]model.Category, 0)
-			return
-		}
 		if err != nil {
 			log.Println("error get categories ", err)
 			categoryChanData <- make([]model.Category, 0)
@@ -178,10 +159,6 @@ func (r repo) GetProducts(ctx context.Context,
 func (r repo) UpdateProduct(ctx context.Context,
 	Product model.Product) error {
 	_, err := r.GetProductByID(ctx, Product.ProductId)
-	if err == sql.ErrNoRows {
-		return sql.ErrNoRows
-	}
-
 	if err != nil {
 		return err
 	}
@@ -303,9 +280,6 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 
 func (r repo) DeleteProduct(ctx context.Context, id int64) error {
 	_, err := r.GetProductByID(ctx, id)
-	if err == sql.ErrNoRows {
-		return sql.ErrNoRows
-	}
 
 	if err != nil {
 		return err
@@ -349,9 +323,7 @@ func (r repo) GetProductsByIds(ctx context.Context, ids []int64) ([]model.Produc
 
 	querySelect = fmt.Sprintf(querySelect, template)
 	rows, err := r.db.QueryContext(ctx, querySelect, values...)
-	if err == sql.ErrNoRows {
-		return nil, sql.ErrNoRows
-	}
+
 	if err != nil {
 		return nil, err
 	}

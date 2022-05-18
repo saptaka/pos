@@ -2,27 +2,31 @@ package model
 
 import "time"
 
+type Orders struct {
+	Order          Order                  `json:"order"`
+	OrderedProduct []OrderedProductDetail `json:"products,omitempty"`
+}
+
 type Order struct {
-	OrderId           int64                  `json:"orderId"`
-	PaymentID         *int64                 `json:"paymentId"`
-	CashierID         *int64                 `json:"cashierId"`
-	OrderedProduct    []OrderedProductDetail `json:"products,omitempty"`
-	TotalPaid         int                    `json:"totalPaid"`
-	TotalPrice        int                    `json:"totalPrice"`
-	TotalReturn       int                    `json:"totalReturn"`
-	ReceiptID         string                 `json:"receiptId"`
-	ReceiptIDFilePath string                 `json:"-"`
-	CreatedAt         *time.Time             `json:"createdAt"`
-	Cashier           Cashier                `json:"cashier"`
-	PaymentType       Payment                `json:"payment_type"`
+	OrderId   int64  `json:"orderId"`
+	PaymentID *int64 `json:"paymentId"`
+	CashierID *int64 `json:"cashierId"`
+
+	TotalPaid         int        `json:"totalPaid"`
+	TotalPrice        int        `json:"totalPrice"`
+	TotalReturn       int        `json:"totalReturn"`
+	ReceiptID         string     `json:"receiptId"`
+	ReceiptIDFilePath string     `json:"-"`
+	CreatedAt         *time.Time `json:"createdAt"`
+	Cashier           Cashier    `json:"cashier"`
+	PaymentType       Payment    `json:"payment_type"`
 }
 
 type OrderedProductDetail struct {
 	Product
-	DiscountID       *int64 `json:"discountId"`
-	Qty              int    `json:"Qty" validate:"required"`
-	TotalFinalPrice  int    `json:"totalFinalPrice"`
-	TotalNormalPrice int    `json:"totalNormalPrice"`
+	Qty              int `json:"qty" validate:"required"`
+	TotalFinalPrice  int `json:"totalFinalPrice"`
+	TotalNormalPrice int `json:"totalNormalPrice"`
 }
 
 type AddOrderRequest struct {

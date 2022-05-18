@@ -72,7 +72,8 @@ func (r repo) SetupTableStructure() {
 		total_return int NOT NULL DEFAULT '0',
 		receipt_file_path varchar(255) CHARACTER SET utf8mb4  NOT NULL DEFAULT '',
 		is_downloaded tinyint NOT NULL DEFAULT '0',
-		UNIQUE KEY id (id)
+		UNIQUE KEY id (id),
+		INDEX(receipt_id)
 	  ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 ; 
 	  `
 
@@ -100,7 +101,8 @@ func (r repo) SetupTableStructure() {
 		category_id bigint unsigned DEFAULT NULL,
 		updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-		UNIQUE KEY id (id)
+		UNIQUE KEY id (id),
+		INDEX(category_id)
 	  ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4;
 	  `
 
@@ -114,13 +116,9 @@ func (r repo) SetupTableStructure() {
 		total_final_price int DEFAULT NULL,
 		discount_id bigint unsigned DEFAULT NULL,
 		price_product int DEFAULT NULL,
+		name_product varchar(255) CHARACTER SET utf8mb4 NOT NULL DEFAULT '',
 		UNIQUE KEY id (id),
-		KEY fk_product_id (product_id),
-		KEY fk_order_id (order_id),
-		KEY fk_ordered_discount (discount_id),
-		CONSTRAINT fk_order_id FOREIGN KEY (order_id) REFERENCES orders (id),
-		CONSTRAINT fk_ordered_discount FOREIGN KEY (discount_id) REFERENCES discounts (id),
-		CONSTRAINT fk_product_id FOREIGN KEY (product_id) REFERENCES products (id)
+		INDEX (order_id)
 	  ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 ; 
 	  `
 

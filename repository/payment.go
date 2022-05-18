@@ -22,9 +22,6 @@ func (r repo) GetPaymentByID(ctx context.Context, id int64) (model.Payment, erro
 	err := rows.Scan(&payment.PaymentId, &payment.Name,
 		&payment.Type, &payment.Logo)
 
-	if err == sql.ErrNoRows {
-		return payment, err
-	}
 	if err != nil {
 		return payment, err
 	}
@@ -40,17 +37,12 @@ func (r repo) GetPayments(ctx context.Context,
 	if limit > 0 {
 		query += " limit ? offset ?;"
 		rows, err = r.db.QueryContext(ctx, query, limit, skip)
-		if err == sql.ErrNoRows {
-			return nil, sql.ErrNoRows
-		}
+
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		rows, err = r.db.QueryContext(ctx, query)
-		if err == sql.ErrNoRows {
-			return nil, sql.ErrNoRows
-		}
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +68,7 @@ func (r repo) UpdatePayment(ctx context.Context,
 	result, err := r.db.ExecContext(ctx, query, payment.Name, payment.Type, payment.Logo,
 		payment.PaymentId)
 	if err != nil {
-		return sql.ErrNoRows
+		return err
 	}
 	rowaffected, err := result.RowsAffected()
 	if err != nil {

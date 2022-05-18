@@ -18,6 +18,9 @@ type OrderRepo interface {
 		orderRequest model.Order) (model.Order, error)
 	DownloadReceipt(ctx context.Context, id int64) (string, error)
 	GetDownloadStatus(ctx context.Context, id int64) (bool, error)
+	CreateOrderedProduct(ctx context.Context, id int64, orderRequest []model.OrderedProductDetail) error
+	GetOrderedProductByOrderId(ctx context.Context,
+		id int64) ([]model.OrderedProductDetail, error)
 }
 
 func (r repo) GetOrder(ctx context.Context, limit, skip int) ([]model.Order, error) {
@@ -42,20 +45,12 @@ func (r repo) GetOrder(ctx context.Context, limit, skip int) ([]model.Order, err
 		if skip != 0 {
 			query += " LIMIT ? OFFSET ?;"
 			rows, err = r.db.QueryContext(ctx, query, limit, skip)
-			if err == sql.ErrNoRows {
-				orderChanData <- make([]model.Order, 0)
-				return
-			}
 			if err != nil {
 				orderChanData <- make([]model.Order, 0)
 				return
 			}
 		} else {
 			rows, err = r.db.QueryContext(ctx, query)
-			if err == sql.ErrNoRows {
-				orderChanData <- make([]model.Order, 0)
-				return
-			}
 			if err != nil {
 				orderChanData <- make([]model.Order, 0)
 				return
@@ -74,10 +69,6 @@ func (r repo) GetOrder(ctx context.Context, limit, skip int) ([]model.Order, err
 				&order.ReceiptID,
 				&order.CreatedAt,
 			)
-			if err == sql.ErrNoRows {
-				orderChanData <- make([]model.Order, 0)
-				return
-			}
 			if err != nil {
 				orderChanData <- make([]model.Order, 0)
 				return
@@ -162,9 +153,6 @@ func (r repo) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
 		&order.ReceiptID,
 		&order.CreatedAt,
 	)
-	if err == sql.ErrNoRows {
-		return order, sql.ErrNoRows
-	}
 	if err != nil {
 		return order, err
 	}
@@ -233,9 +221,6 @@ func (r repo) GetOrderByReceiptID(ctx context.Context, receiptId string) (model.
 		&order.ReceiptID,
 		&order.CreatedAt,
 	)
-	if err == sql.ErrNoRows {
-		return order, sql.ErrNoRows
-	}
 	if err != nil {
 		return order, err
 	}
@@ -300,13 +285,6 @@ func (r repo) CreateOrder(ctx context.Context, orderRequest model.Order) (model.
 		return orderRequest, err
 	}
 	orderRequest.OrderId = id
-	go func(id int64) {
-		err = r.CreateOrderedProduct(ctx, id, orderRequest.OrderedProduct)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-	}(id)
 
 	return orderRequest, nil
 }
@@ -358,10 +336,8 @@ func (r repo) GetDownloadStatus(ctx context.Context, id int64) (bool, error) {
 	return true, nil
 }
 
-func (r repo) CreateOrderedProduct(ctx context.Context,
-	orderID int64,
-	orderRequests []model.OrderedProductDetail) error {
-	if len(orderRequests) == 0 {
+func (r repo) CreateOrderedProduct(ctx context.Context, id int64, orderRequest []model.OrderedProductDetail) error {
+	if len(orderRequest) == 0 {
 		return sql.ErrNoRows
 	}
 	query := `INSERT INTO ordered_products(
@@ -369,25 +345,27 @@ func (r repo) CreateOrderedProduct(ctx context.Context,
 		order_id,
 		qty,
 		price_product,
+		name_product,
 		total_normal_price,
 		total_final_price,
 		discount_id)
 		VALUES %s;`
 	var values []interface{}
-	for _, item := range orderRequests {
+	for _, item := range orderRequest {
 		values = append(values,
 			item.ProductId,
-			orderID,
+			id,
 			item.Qty,
 			item.Price,
+			item.Name,
 			item.TotalNormalPrice,
 			item.TotalFinalPrice,
-			item.DiscountID,
+			item.DiscountId,
 		)
 	}
-	template := "(?,?,?,?,?,?,?)"
-	if len(orderRequests) > 1 {
-		template += strings.Repeat(",(?,?,?,?,?,?,?)", len(orderRequests)-1)
+	template := "(?,?,?,?,?,?,?,?)"
+	if len(orderRequest) > 1 {
+		template += strings.Repeat(",(?,?,?,?,?,?,?,?)", len(orderRequest)-1)
 	}
 	query = fmt.Sprintf(query, template)
 	stmt, err := r.db.PrepareContext(ctx, query)
@@ -399,4 +377,49 @@ func (r repo) CreateOrderedProduct(ctx context.Context,
 		return err
 	}
 	return nil
+}
+
+func (r repo) GetOrderedProductByOrderId(ctx context.Context,
+	id int64) ([]model.OrderedProductDetail, error) {
+
+	query := `
+	SELECT product_id,
+		qty,
+		total_normal_price,
+		total_final_price,
+		discount_id,
+		price_product,
+		name_product 
+	FROM ordered_products
+	WHERE order_id=?
+	`
+	rows, err := r.db.QueryContext(ctx, query, id)
+	if err != nil {
+		return nil, err
+	}
+	var orderedProducts []model.OrderedProductDetail
+	for rows.Next() {
+		var orderedProduct model.OrderedProductDetail
+		err := rows.Scan(&orderedProduct.ProductId,
+			&orderedProduct.Qty,
+			&orderedProduct.TotalNormalPrice,
+			&orderedProduct.TotalFinalPrice,
+			&orderedProduct.DiscountId,
+			&orderedProduct.Price,
+			&orderedProduct.Name,
+		)
+		if err != nil {
+			return nil, err
+		}
+		if orderedProduct.DiscountId != nil {
+			discount, err := r.GetDiscountByID(ctx, *orderedProduct.DiscountId)
+			if err != nil {
+				return nil, err
+			}
+			orderedProduct.Discount = &discount
+		}
+		orderedProducts = append(orderedProducts, orderedProduct)
+	}
+
+	return orderedProducts, nil
 }

@@ -36,17 +36,11 @@ func (r repo) GetCashiers(ctx context.Context,
 	if limit > 0 {
 		query += " limit ? offset ?;"
 		rows, err = r.db.QueryContext(ctx, query, limit, skip)
-		if err == sql.ErrNoRows {
-			return nil, sql.ErrNoRows
-		}
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		rows, err = r.db.QueryContext(ctx, query)
-		if err == sql.ErrNoRows {
-			return nil, sql.ErrNoRows
-		}
 		if err != nil {
 			return nil, err
 		}
@@ -126,10 +120,6 @@ func (r repo) CreateCashier(ctx context.Context, name, passcode string) (model.C
 
 func (r repo) DeleteCashier(ctx context.Context, id int64) error {
 	_, err := r.GetCashierByID(ctx, id)
-	if err == sql.ErrNoRows {
-		return sql.ErrNoRows
-	}
-
 	if err != nil {
 		return err
 	}

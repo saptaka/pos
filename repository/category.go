@@ -35,17 +35,11 @@ func (r repo) GetCategories(ctx context.Context,
 	if limit > 0 {
 		query += " limit ? offset ?;"
 		rows, err = r.db.QueryContext(ctx, query, limit, skip)
-		if err == sql.ErrNoRows {
-			return nil, sql.ErrNoRows
-		}
 		if err != nil {
 			return nil, err
 		}
 	} else {
 		rows, err = r.db.QueryContext(ctx, query)
-		if err == sql.ErrNoRows {
-			return nil, sql.ErrNoRows
-		}
 		if err != nil {
 			return nil, err
 		}

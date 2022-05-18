@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/saptaka/pos/model"
+	"github.com/saptaka/pos/repository"
 	"github.com/saptaka/pos/utils"
 )
 
@@ -37,22 +38,69 @@ func (s service) ListOrder(limit, skip int) ([]byte, int) {
 }
 
 func (s service) DetailOrder(id int64, receiptId string) ([]byte, int) {
-	var order model.Order
-	var err error
-	if id != 0 {
-		order, err = s.db.GetOrderByID(s.ctx, id)
-	} else {
-		order, err = s.db.GetOrderByReceiptID(s.ctx, receiptId)
-	}
 
-	if err == sql.ErrNoRows {
+	orderChan := make(chan model.Order)
+	errorOrderChan := make(chan error)
+	go func(orderChan chan model.Order,
+		errorOrderChan chan error) {
+		var order model.Order
+		var err error
+		if id != 0 {
+			order, err = s.db.GetOrderByID(s.ctx, id)
+		} else {
+			order, err = s.db.GetOrderByReceiptID(s.ctx, receiptId)
+		}
+		if err != nil {
+			orderChan <- model.Order{}
+			errorOrderChan <- err
+			return
+		}
+		orderChan <- order
+		errorOrderChan <- nil
+	}(orderChan, errorOrderChan)
+
+	orderedProductChan := make(chan []model.OrderedProductDetail)
+	errorOrderedProductChan := make(chan error)
+
+	go func(orderedProductChan chan []model.OrderedProductDetail,
+		errorOrderedProductChan chan error) {
+		orderedProducts, err := s.db.GetOrderedProductByOrderId(s.ctx, id)
+		if err != nil {
+			orderedProductChan <- make([]model.OrderedProductDetail, 0)
+			errorOrderedProductChan <- err
+			return
+		}
+		orderedProductChan <- orderedProducts
+		errorOrderedProductChan <- nil
+	}(orderedProductChan, errorOrderedProductChan)
+
+	order := <-orderChan
+	errOrder := <-errorOrderChan
+	orderedProducts := <-orderedProductChan
+	errOrderedProduct := <-errorOrderedProductChan
+
+	if errOrder == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
-	if err != nil {
-		log.Println(err)
+
+	if errOrder != nil {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, order)
+
+	if errOrderedProduct == sql.ErrNoRows {
+		return utils.ResponseWrapper(http.StatusNotFound, nil)
+	}
+
+	if errOrderedProduct != nil {
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+	}
+
+	orders := model.Orders{
+		Order:          order,
+		OrderedProduct: orderedProducts,
+	}
+
+	return utils.ResponseWrapper(http.StatusOK, orders)
 }
 
 func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int) {
@@ -99,16 +147,15 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
-	orderedProductDetails, totalPrice := s.generateOrderedProduct(products, mapProductQty)
+	orderedProducts, totalPrice := s.generateOrderedProduct(products, mapProductQty)
 	now := time.Now()
 	order := model.Order{
-		PaymentID:      &orderRequest.PaymentID,
-		OrderedProduct: orderedProductDetails,
-		TotalPaid:      orderRequest.TotalPaid,
-		TotalPrice:     totalPrice,
-		TotalReturn:    orderRequest.TotalPaid - totalPrice,
-		CreatedAt:      &now,
-		ReceiptID:      s.generateOrderID(),
+		PaymentID:   &orderRequest.PaymentID,
+		TotalPaid:   orderRequest.TotalPaid,
+		TotalPrice:  totalPrice,
+		TotalReturn: orderRequest.TotalPaid - totalPrice,
+		CreatedAt:   &now,
+		ReceiptID:   s.generateOrderID(),
 	}
 
 	order, err = s.db.CreateOrder(s.ctx, order)
@@ -116,13 +163,30 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
-	paymentType, err := s.getPaymentType(s.ctx, orderRequest.PaymentID)
-	if err != nil {
-		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
-	}
+	paymentChan := make(chan model.Payment)
+	go func(paymentCahnData chan model.Payment) {
+		paymentType, err := s.getPaymentType(s.ctx, orderRequest.PaymentID)
+		if err != nil {
+			log.Println(err)
+			paymentCahnData <- model.Payment{}
+		}
+		paymentCahnData <- paymentType
+	}(paymentChan)
+	paymentType := <-paymentChan
 	order.PaymentType = paymentType
-	return utils.ResponseWrapper(http.StatusOK, order)
+	orders := model.Orders{
+		Order:          order,
+		OrderedProduct: orderedProducts,
+	}
+
+	go func(r repository.Repo, id int64, orderedItems []model.OrderedProductDetail) {
+		err := r.CreateOrderedProduct(context.Background(), id, orderedProducts)
+		if err != nil {
+			log.Println(err)
+			return
+		}
+	}(s.db, order.OrderId, orderedProducts)
+	return utils.ResponseWrapper(http.StatusOK, orders)
 }
 
 func (s service) DownloadOrder(id int64) ([]byte, int) {
@@ -185,7 +249,6 @@ func (s service) generateOrderedProduct(
 			TotalFinalPrice:  finalPrice,
 			TotalNormalPrice: normalPrice,
 			Qty:              productQty,
-			DiscountID:       productItem.DiscountId,
 		}
 		orderedProductDetails = append(orderedProductDetails, orderedProductDetail)
 	}

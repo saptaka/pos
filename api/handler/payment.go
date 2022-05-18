@@ -69,7 +69,7 @@ func (s service) CreatePayment(payment model.Payment) ([]byte, int) {
 func (s service) UpdatePayment(payment model.Payment) ([]byte, int) {
 	err := s.db.UpdatePayment(s.ctx, payment)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil)
 	}
 	if err != nil {
 		log.Println(err)
