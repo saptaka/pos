@@ -92,7 +92,6 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 	for _, productItem := range orderRequest.OrderedProduct {
 		productIds = append(productIds, productItem.ProductId)
 		mapProductQty[productItem.ProductId] = productItem.Qty
-		orderRequest.OrderedProduct = orderRequest.OrderedProduct[1:]
 	}
 
 	products, err := s.db.GetProductsByIds(s.ctx, productIds)
