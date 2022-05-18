@@ -35,10 +35,12 @@ func middleware(next func(res http.ResponseWriter, req *http.Request)) func(res 
 
 		bodyBytes, err := ioutil.ReadAll(req.Body)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		bodyString := string(bodyBytes)
-		log.Println(bodyString)
+		if bodyString != "" {
+			log.Println(bodyString)
+		}
 		next(res, req)
 	})
 }
