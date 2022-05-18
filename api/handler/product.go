@@ -11,15 +11,15 @@ import (
 )
 
 type Product interface {
-	ListProduct(limit, skip int, query string) ([]byte, int)
+	ListProduct(limit, skip int, categoryID int64, query string) ([]byte, int)
 	DetailProduct(id int64) ([]byte, int)
 	CreateProduct(product model.Product) ([]byte, int)
 	UpdateProduct(product model.Product) ([]byte, int)
 	DeleteProduct(id int64) ([]byte, int)
 }
 
-func (s service) ListProduct(limit, skip int, query string) ([]byte, int) {
-	products, err := s.db.GetProducts(context.Background(), limit, skip, query)
+func (s service) ListProduct(limit, skip int, categoryID int64, query string) ([]byte, int) {
+	products, err := s.db.GetProducts(context.Background(), limit, skip, categoryID, query)
 	listProduct := model.ListProduct{
 		Products: products,
 		Meta: model.Meta{

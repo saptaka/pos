@@ -13,7 +13,7 @@ import (
 
 type ProductRepo interface {
 	GetProductByID(ctx context.Context, id int64) (model.Product, error)
-	GetProducts(ctx context.Context, limit, skip int, query string) ([]model.Product, error)
+	GetProducts(ctx context.Context, limit, skip int, categoryID int64, query string) ([]model.Product, error)
 	UpdateProduct(ctx context.Context, product model.Product) error
 	CreateProduct(ctx context.Context, product model.Product) (model.Product, error)
 	DeleteProduct(ctx context.Context, id int64) error
@@ -60,7 +60,7 @@ func (r repo) GetProductByID(ctx context.Context, id int64) (model.Product, erro
 }
 
 func (r repo) GetProducts(ctx context.Context,
-	limit, skip int, query string) ([]model.Product, error) {
+	limit, skip int, categoryID int64, query string) ([]model.Product, error) {
 
 	productChan := make(chan []model.Product)
 	go func(productChanData chan []model.Product) {
@@ -76,9 +76,15 @@ func (r repo) GetProducts(ctx context.Context,
 			`
 		var withQuery string
 		values := make([]interface{}, 0)
-		if query != "" {
+		if query != "" && categoryID != 0 {
+			withQuery = " WHERE name=? AND category_id=?"
+			values = append(values, query, categoryID)
+		} else if query != "" {
 			withQuery = " WHERE name=?"
 			values = append(values, query)
+		} else if categoryID != 0 {
+			withQuery = " WHERE category_id=?"
+			values = append(values, categoryID)
 		}
 		querySelect = fmt.Sprintf(querySelect, withQuery)
 
