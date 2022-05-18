@@ -155,6 +155,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		TotalPrice:  totalPrice,
 		TotalReturn: orderRequest.TotalPaid - totalPrice,
 		CreatedAt:   &now,
+		UpdatedAt:   &now,
 		ReceiptID:   s.generateOrderID(),
 	}
 
@@ -163,17 +164,6 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
-	paymentChan := make(chan model.Payment)
-	go func(paymentCahnData chan model.Payment) {
-		paymentType, err := s.getPaymentType(s.ctx, orderRequest.PaymentID)
-		if err != nil {
-			log.Println(err)
-			paymentCahnData <- model.Payment{}
-		}
-		paymentCahnData <- paymentType
-	}(paymentChan)
-	paymentType := <-paymentChan
-	order.PaymentType = paymentType
 	orders := model.Orders{
 		Order:          order,
 		OrderedProduct: orderedProducts,

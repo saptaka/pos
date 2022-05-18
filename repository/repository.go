@@ -64,6 +64,7 @@ func (r repo) SetupTableStructure() {
 	  CREATE TABLE  IF NOT EXISTS orders (
 		id bigint unsigned NOT NULL AUTO_INCREMENT,
 		created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+		updated_at timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL COMMENT ''
 		cashier_id bigint unsigned DEFAULT NULL,
 		payment_type_id bigint unsigned DEFAULT NULL,
 		receipt_id varchar(255) CHARACTER SET utf8mb4  NOT NULL DEFAULT '',
