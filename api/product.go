@@ -22,9 +22,9 @@ type ProductRouter interface {
 func (r *router) RouteProductPath() {
 	r.mux.HandleFunc("/products", middleware(r.ListProduct)).Methods("GET")
 	r.mux.HandleFunc("/products/{productId}", middleware(r.DetailProduct)).Methods("GET")
-	r.mux.HandleFunc("/products", middleware(r.CreateProduct)).Methods("POST")
-	r.mux.HandleFunc("/products/{productId}", middleware(r.UpdateProduct)).Methods("PUT")
-	r.mux.HandleFunc("/products/{productId}", middleware(r.DeleteProduct)).Methods("DELETE")
+	r.mux.HandleFunc("/products", r.CreateProduct).Methods("POST")
+	r.mux.HandleFunc("/products/{productId}", (r.UpdateProduct)).Methods("PUT")
+	r.mux.HandleFunc("/products/{productId}", r.DeleteProduct).Methods("DELETE")
 }
 
 func (r *router) ListProduct(res http.ResponseWriter, req *http.Request) {
