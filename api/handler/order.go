@@ -11,7 +11,6 @@ import (
 	"time"
 
 	"github.com/saptaka/pos/model"
-	"github.com/saptaka/pos/repository"
 	"github.com/saptaka/pos/utils"
 )
 
@@ -164,18 +163,18 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
+
+	err = s.db.CreateOrderedProduct(context.Background(), order.OrderId, orderedProducts)
+	if err != nil {
+		log.Println(err)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+	}
+
 	orders := model.Orders{
 		Order:          order,
 		OrderedProduct: orderedProducts,
 	}
 
-	go func(r repository.Repo, id int64, orderedItems []model.OrderedProductDetail) {
-		err := r.CreateOrderedProduct(context.Background(), id, orderedProducts)
-		if err != nil {
-			log.Println(err)
-			return
-		}
-	}(s.db, order.OrderId, orderedProducts)
 	return utils.ResponseWrapper(http.StatusOK, orders)
 }
 
