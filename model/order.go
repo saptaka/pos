@@ -23,10 +23,14 @@ type Order struct {
 }
 
 type OrderedProductDetail struct {
-	Product
-	Qty              int `json:"qty" validate:"required"`
-	TotalFinalPrice  int `json:"totalFinalPrice"`
-	TotalNormalPrice int `json:"totalNormalPrice"`
+	ProductId        int64     `json:"productId"`
+	Name             string    `json:"name" validate:"required"`
+	Price            int       `json:"price" validate:"required"`
+	Qty              int       `json:"qty" validate:"required"`
+	TotalFinalPrice  int       `json:"totalFinalPrice"`
+	TotalNormalPrice int       `json:"totalNormalPrice"`
+	DiscountId       *int64    `json:"discountId"`
+	Discount         *Discount `json:"discount"`
 }
 
 type AddOrderRequest struct {

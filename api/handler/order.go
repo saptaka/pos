@@ -194,7 +194,8 @@ func (s service) generateOrderedProduct(
 	orderRequest []model.OrderedProduct) ([]model.OrderedProductDetail, int, error) {
 	var totalPrice int
 	var orderedProductDetails []model.OrderedProductDetail
-	for _, productItem := range orderRequest {
+	mapOrderedProduct := make(map[int64]*int)
+	for index, productItem := range orderRequest {
 
 		var product model.Product
 		var err error
@@ -218,6 +219,8 @@ func (s service) generateOrderedProduct(
 			if err != nil {
 				log.Println(err)
 			}
+			productCache[product.ProductId] = &product
+
 		}()
 
 		var finalPrice int
@@ -230,15 +233,34 @@ func (s service) generateOrderedProduct(
 			finalPrice = normalPrice
 		}
 
+		if mapOrderedProduct[product.ProductId] != nil {
+			orderIndex := mapOrderedProduct[product.ProductId]
+			orderedProductDetails[*orderIndex].Qty += productItem.Qty
+			orderedProductDetails[*orderIndex].TotalFinalPrice += finalPrice
+			orderedProductDetails[*orderIndex].TotalNormalPrice += normalPrice
+			totalPrice += finalPrice
+			continue
+		}
+
+		var discount *model.Discount
+		if product.Discount != nil {
+			discount = product.Discount
+		}
+
 		totalPrice += finalPrice
 		orderedProductDetail := model.OrderedProductDetail{
-			Product:          product,
+			ProductId:        product.ProductId,
+			Name:             product.Name,
+			Price:            totalPrice,
+			Qty:              productItem.Qty,
 			TotalFinalPrice:  finalPrice,
 			TotalNormalPrice: normalPrice,
-			Qty:              productItem.Qty,
+			DiscountId:       product.DiscountId,
+			Discount:         discount,
 		}
 		orderedProductDetails = append(orderedProductDetails, orderedProductDetail)
-
+		orderIndex := index
+		mapOrderedProduct[product.ProductId] = &orderIndex
 	}
 
 	return orderedProductDetails, totalPrice, nil
