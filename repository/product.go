@@ -209,17 +209,11 @@ func (r repo) UpdateProduct(ctx context.Context,
 		return fmt.Errorf("nothing updated")
 	}
 
-	result, err := r.db.ExecContext(ctx, query, values...)
+	_, err = r.db.ExecContext(ctx, query, values...)
 	if err != nil {
 		return err
 	}
-	rowAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowAffected == 0 {
-		return sql.ErrNoRows
-	}
+
 	return nil
 }
 
@@ -299,17 +293,9 @@ func (r repo) DeleteProduct(ctx context.Context, id int64) error {
 		return err
 	}
 	query := "DELETE FROM products WHERE id=?"
-	result, err := r.db.ExecContext(ctx, query, id)
+	_, err = r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
-	}
-	rowAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-
-	if rowAffected == 0 {
-		return sql.ErrNoRows
 	}
 
 	return err

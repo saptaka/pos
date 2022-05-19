@@ -65,20 +65,14 @@ func (r repo) UpdateCashier(ctx context.Context,
 			passcode=?, 
 			updated_at=CURRENT_TIMESTAMP() 
 		WHERE id=?`
-	result, err := r.db.ExecContext(ctx, query,
+	_, err := r.db.ExecContext(ctx, query,
 		cashierDetail.Name,
 		cashierDetail.Passcode,
 		cashierDetail.CashierId)
 	if err != nil {
 		return err
 	}
-	rowAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowAffected == 0 {
-		return sql.ErrNoRows
-	}
+
 	return err
 }
 
@@ -124,17 +118,11 @@ func (r repo) DeleteCashier(ctx context.Context, id int64) error {
 		return err
 	}
 	query := "DELETE FROM cashiers WHERE id=?"
-	result, err := r.db.ExecContext(ctx, query, id)
+	_, err = r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
-	rowAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowAffected == 0 {
-		return sql.ErrNoRows
-	}
+
 	return nil
 }
 

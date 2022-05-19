@@ -58,19 +58,17 @@ func (r repo) GetCategories(ctx context.Context,
 
 func (r repo) UpdateCategory(ctx context.Context,
 	category model.Category) error {
+	_, err := r.GetCategoryByID(ctx, category.CategoryId)
+	if err != nil {
+		return err
+	}
 	query := "UPDATE categories SET name=? WHERE id=?"
-	result, err := r.db.ExecContext(ctx, query, category.Name,
+	_, err = r.db.ExecContext(ctx, query, category.Name,
 		category.CategoryId)
 	if err != nil {
 		return err
 	}
-	rowAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowAffected == 0 {
-		return sql.ErrNoRows
-	}
+
 	return err
 }
 
@@ -109,17 +107,16 @@ func (r repo) CreateCategory(ctx context.Context, name string) (model.Category, 
 }
 
 func (r repo) DeleteCategory(ctx context.Context, id int64) error {
+
+	_, err := r.GetCategoryByID(ctx, id)
+	if err != nil {
+		return err
+	}
 	query := "DELETE FROM categories WHERE id=?"
-	result, err := r.db.ExecContext(ctx, query, id)
+	_, err = r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
-	rowAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowAffected == 0 {
-		return sql.ErrNoRows
-	}
+
 	return err
 }

@@ -307,17 +307,11 @@ func (r repo) updateIsDownloadReceipt(ctx context.Context, id int64) error {
 	query := `
 		UPDATE orders SET is_downloaded = 1 WHERE id=?
 	`
-	result, err := r.db.ExecContext(ctx, query, id)
+	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
-	rowAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowAffected == 0 {
-		return sql.ErrNoRows
-	}
+
 	return nil
 }
 

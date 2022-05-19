@@ -199,10 +199,14 @@ func (s service) generateOrderedProduct(
 
 		var product model.Product
 		var err error
-		if productCache[productItem.ProductId] != nil {
-			product = *productCache[productItem.ProductId]
+		productMapValue, ok := productCache.Get(productItem.ProductId)
+		if ok && productMapValue != nil {
+			product = *productMapValue
 		} else {
 			product, err = s.db.GetProductByID(s.ctx, productItem.ProductId)
+			if err == sql.ErrNoRows {
+				continue
+			}
 			if err != nil {
 				log.Println(err)
 				return orderedProductDetails, totalPrice, err
@@ -212,16 +216,15 @@ func (s service) generateOrderedProduct(
 		if product.Stock < productItem.Qty {
 			continue
 		}
+		product.Stock = product.Stock - productItem.Qty
 
-		go func() {
-			product.Stock = product.Stock - productItem.Qty
-			err := s.db.UpdateProduct(s.ctx, product)
-			if err != nil {
-				log.Println(err)
-			}
-			productCache[product.ProductId] = &product
+		err = s.db.UpdateProduct(s.ctx, product)
+		if err != nil {
+			log.Printf("error update product in order process %d : %s",
+				product.ProductId, err)
+		}
 
-		}()
+		productCache.Set(product.ProductId, &product)
 
 		var finalPrice int
 		normalPrice := product.Price * productItem.Qty

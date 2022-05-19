@@ -5,12 +5,28 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
 )
 
-var productCache = make(map[int64]*model.Product)
+type syncMap struct {
+	m sync.Map
+}
+
+func (c *syncMap) Get(key int64) (*model.Product, bool) {
+	value, ok := c.m.Load(key)
+	if ok {
+		product := value.(*model.Product)
+		return product, true
+	}
+	return nil, false
+}
+
+func (c *syncMap) Set(key int64, value *model.Product) {
+	c.m.Store(key, value)
+}
 
 type Product interface {
 	ListProduct(limit, skip int, categoryID int64, query string) ([]byte, int)
@@ -62,7 +78,7 @@ func (s service) CreateProduct(productRequest model.Product) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusBadRequest, product)
 	}
 
-	productCache[product.ProductId] = &product
+	productCache.Set(product.ProductId, &product)
 
 	return utils.ResponseWrapper(http.StatusOK, product)
 }
@@ -76,6 +92,9 @@ func (s service) UpdateProduct(product model.Product) ([]byte, int) {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
+
+	productCache.Set(product.ProductId, &product)
+
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }
 
@@ -89,4 +108,12 @@ func (s service) DeleteProduct(id int64) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, nil)
+}
+
+func (s service) LoadProduct() error {
+	products, err := s.db.GetProducts(s.ctx, 0, 0, 0, "")
+	for _, product := range products {
+		productCache.Set(product.ProductId, &product)
+	}
+	return err
 }
