@@ -233,7 +233,7 @@ func (r repo) GetOrderByReceiptID(ctx context.Context, receiptId string) (model.
 			cashier, err := r.GetCashierByID(ctx, id)
 			if err != nil {
 				cashierChanData <- model.Cashier{}
-				log.Println("error selecting cashier found")
+				log.Println("error get cashier ", err)
 				return
 			}
 			cashierChanData <- cashier
@@ -249,7 +249,7 @@ func (r repo) GetOrderByReceiptID(ctx context.Context, receiptId string) (model.
 			payment, err := r.GetPaymentByID(ctx, id)
 			if err != nil {
 				paymentChanData <- model.Payment{}
-				log.Println("error get payment found")
+				log.Println("error get payment ", err)
 				return
 			}
 			paymentChanData <- payment
