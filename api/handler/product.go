@@ -10,6 +10,8 @@ import (
 	"github.com/saptaka/pos/utils"
 )
 
+var productCache = make(map[int64]*model.Product)
+
 type Product interface {
 	ListProduct(limit, skip int, categoryID int64, query string) ([]byte, int)
 	DetailProduct(id int64) ([]byte, int)
@@ -59,6 +61,9 @@ func (s service) CreateProduct(productRequest model.Product) ([]byte, int) {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, product)
 	}
+
+	productCache[product.ProductId] = &product
+
 	return utils.ResponseWrapper(http.StatusOK, product)
 }
 

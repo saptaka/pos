@@ -7,7 +7,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"sort"
 	"time"
 
 	"github.com/saptaka/pos/model"
@@ -103,28 +102,12 @@ func (s service) DetailOrder(id int64, receiptId string) ([]byte, int) {
 }
 
 func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int) {
-	for _, item := range orderRequest {
-		err := s.validation.Struct(item)
-		if err != nil {
-			return utils.ResponseWrapper(http.StatusBadRequest, nil)
-		}
-	}
-	var productIds []int64
-	mapProductQty := make(map[int64]int)
-	for _, productItem := range orderRequest {
-		productIds = append(productIds, productItem.ProductId)
-		mapProductQty[productItem.ProductId] = productItem.Qty
-		orderRequest = orderRequest[1:]
-	}
-	sort.Slice(orderRequest, func(i, j int) bool {
-		return orderRequest[i].ProductId < orderRequest[j].ProductId
-	})
 
-	products, err := s.db.GetProductsByIds(s.ctx, productIds)
+	orderedProductDetails, totalPrice, err := s.generateOrderedProduct(orderRequest)
 	if err != nil {
+		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
-	orderedProductDetails, totalPrice := s.generateOrderedProduct(products, mapProductQty)
 	subTotalOrder := model.SubTotalOrder{
 		Subtotal:       totalPrice,
 		OrderedProduct: orderedProductDetails,
@@ -134,19 +117,13 @@ func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int
 
 func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 
-	var productIds []int64
-	mapProductQty := make(map[int64]int)
-	for _, productItem := range orderRequest.OrderedProduct {
-		productIds = append(productIds, productItem.ProductId)
-		mapProductQty[productItem.ProductId] = productItem.Qty
-	}
-
-	products, err := s.db.GetProductsByIds(s.ctx, productIds)
+	var totalPrice int
+	var orderedProductDetails []model.OrderedProductDetail
+	orderedProductDetails, totalPrice, err := s.generateOrderedProduct(orderRequest.OrderedProduct)
 	if err != nil {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
-	orderedProducts, totalPrice := s.generateOrderedProduct(products, mapProductQty)
 	now := time.Now()
 	order := model.Order{
 		PaymentID:   &orderRequest.PaymentID,
@@ -164,7 +141,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 
-	err = s.db.CreateOrderedProduct(context.Background(), order.OrderId, orderedProducts)
+	err = s.db.CreateOrderedProduct(context.Background(), order.OrderId, orderedProductDetails)
 	if err != nil {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
@@ -172,7 +149,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 
 	orders := model.Orders{
 		Order:          order,
-		OrderedProduct: orderedProducts,
+		OrderedProduct: orderedProductDetails,
 	}
 
 	return utils.ResponseWrapper(http.StatusOK, orders)
@@ -214,35 +191,57 @@ func (s service) calculatePrice(discount model.Discount, price, qty int) int {
 }
 
 func (s service) generateOrderedProduct(
-	products []model.Product, mapProductQty map[int64]int) ([]model.OrderedProductDetail, int) {
-	var orderedProductDetails []model.OrderedProductDetail
+	orderRequest []model.OrderedProduct) ([]model.OrderedProductDetail, int, error) {
 	var totalPrice int
-	for _, productItem := range products {
-		productQty := mapProductQty[productItem.ProductId]
-		if productQty == 0 {
+	var orderedProductDetails []model.OrderedProductDetail
+	for _, productItem := range orderRequest {
+
+		var product model.Product
+		var err error
+		if productCache[productItem.ProductId] != nil {
+			product = *productCache[productItem.ProductId]
+		} else {
+			product, err = s.db.GetProductByID(s.ctx, productItem.ProductId)
+			if err != nil {
+				log.Println(err)
+				return orderedProductDetails, totalPrice, err
+			}
+		}
+
+		if product.Stock < productItem.Qty {
 			continue
 		}
-		var finalPrice int
-		normalPrice := productItem.Price * productQty
 
-		if productItem.Discount != nil {
-			finalPrice = s.calculatePrice(*productItem.Discount,
-				productItem.Price,
-				productQty)
+		go func() {
+			product.Stock = product.Stock - productItem.Qty
+			err := s.db.UpdateProduct(s.ctx, product)
+			if err != nil {
+				log.Println(err)
+			}
+		}()
+
+		var finalPrice int
+		normalPrice := product.Price * productItem.Qty
+		if product.DiscountId != nil {
+			finalPrice = s.calculatePrice(*product.Discount,
+				product.Price,
+				productItem.Qty)
 		} else {
 			finalPrice = normalPrice
 		}
+
 		totalPrice += finalPrice
 		orderedProductDetail := model.OrderedProductDetail{
-			Product:          productItem,
+			Product:          product,
 			TotalFinalPrice:  finalPrice,
 			TotalNormalPrice: normalPrice,
-			Qty:              productQty,
+			Qty:              productItem.Qty,
 		}
 		orderedProductDetails = append(orderedProductDetails, orderedProductDetail)
+
 	}
 
-	return orderedProductDetails, totalPrice
+	return orderedProductDetails, totalPrice, nil
 }
 
 func (s service) generateOrderID() string {

@@ -30,7 +30,8 @@ func (r repo) GetProductByID(ctx context.Context, id int64) (model.Product, erro
 				price,
 				image,
 				category_id,
-				sku 
+				sku,
+				discount_id
 			FROM products 
 			WHERE id=?`
 	row := r.db.QueryRowContext(ctx, query, id)
@@ -42,6 +43,7 @@ func (r repo) GetProductByID(ctx context.Context, id int64) (model.Product, erro
 		&product.Image,
 		&product.CategoryID,
 		&product.SKU,
+		&product.DiscountId,
 	)
 	if err != nil {
 		return product, err
@@ -51,6 +53,14 @@ func (r repo) GetProductByID(ctx context.Context, id int64) (model.Product, erro
 		if err != nil {
 			return product, err
 		}
+		if product.DiscountId != nil {
+			discount, err := r.GetDiscountByID(ctx, *product.DiscountId)
+			if err != nil {
+				return product, err
+			}
+			product.Discount = &discount
+		}
+
 		product.Category = &category
 	}
 
