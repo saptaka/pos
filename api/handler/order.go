@@ -141,16 +141,17 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 
-	err = s.db.CreateOrderedProduct(context.Background(), order.OrderId, orderedProductDetails)
-	if err != nil {
-		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
-	}
-
 	orders := model.Orders{
 		Order:          order,
 		OrderedProduct: orderedProductDetails,
 	}
+
+	go func() {
+		err = s.db.CreateOrderedProduct(context.Background(), order.OrderId, orderedProductDetails)
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 
 	return utils.ResponseWrapper(http.StatusOK, orders)
 }
