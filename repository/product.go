@@ -79,7 +79,8 @@ func (r repo) GetProducts(ctx context.Context,
 				price,
 				image,
 				category_id ,
-				sku 
+				sku,
+				discount_id,
 			FROM products 
 			%s 
 			`
@@ -131,12 +132,22 @@ func (r repo) GetProducts(ctx context.Context,
 				&product.Image,
 				&product.CategoryID,
 				&product.SKU,
+				&product.DiscountId,
 			)
 			if err != nil {
 				log.Println("error get product ", err)
 				productChanData <- make([]model.Product, 0)
 				return
 			}
+			if product.DiscountId != nil {
+				discount, err := r.GetDiscountByID(ctx, *product.DiscountId)
+				if err != sql.ErrNoRows && err != nil {
+					log.Println("error get product ", err)
+					return
+				}
+				product.Discount = &discount
+			}
+
 			products = append(products, product)
 		}
 		productChanData <- products

@@ -5,7 +5,6 @@ import "time"
 type OrderDetails struct {
 	Order          Order                  `json:"order"`
 	OrderedProduct []OrderedProductDetail `json:"products,omitempty"`
-	Meta           Meta                   `json:"meta"`
 }
 
 type ListOrders struct {
