@@ -34,7 +34,7 @@ type OrderedProductDetail struct {
 	Qty              int       `json:"qty" validate:"required"`
 	TotalFinalPrice  int       `json:"totalFinalPrice"`
 	TotalNormalPrice int       `json:"totalNormalPrice"`
-	DiscountId       *int64    `json:"discountId"`
+	DiscountId       *int64    `json:"-"`
 	Discount         *Discount `json:"discount"`
 }
 

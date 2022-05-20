@@ -258,18 +258,20 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 	}
 
 	go func(repoInside repo, id int64, categoryId *int64, discount *model.Discount) {
-		var discountId int64
+		var discountId *int64
 		if discount != nil {
 			discountIDResult, err := repoInside.CreateDiscount(ctx, *discount)
 			if err != nil {
 				log.Println(err)
 				return
 			}
-			discountId = discountIDResult
+			discountId = &discountIDResult
 		}
+
 		updateQuery := `UPDATE products 
 				SET discount_id=?, category_id=?, sku=?
 				WHERE id=?`
+
 		_, err = repoInside.db.ExecContext(ctx, updateQuery, discountId, categoryId, fmt.Sprintf("ID%03d", id), id)
 		if err != nil {
 			log.Println(err)
