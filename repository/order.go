@@ -115,10 +115,12 @@ func (r repo) GetOrder(ctx context.Context, limit, skip int) ([]model.Order, err
 	}
 	for index, order := range orders {
 		if order.CashierID != nil {
-			orders[index].Cashier = mapCashier[*order.CashierID]
+			cashier := mapCashier[*order.CashierID]
+			orders[index].Cashier = &cashier
 		}
 		if order.PaymentID != nil {
-			orders[index].PaymentType = mapPayment[*order.PaymentID]
+			payment := mapPayment[*order.PaymentID]
+			orders[index].PaymentType = &payment
 		}
 	}
 
@@ -189,8 +191,11 @@ func (r repo) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
 	} else {
 		close(paymentChan)
 	}
-	order.Cashier = <-cashierChan
-	order.PaymentType = <-paymentChan
+
+	cashier := <-cashierChan
+	order.Cashier = &cashier
+	payment := <-paymentChan
+	order.PaymentType = &payment
 
 	return order, nil
 }
@@ -257,8 +262,10 @@ func (r repo) GetOrderByReceiptID(ctx context.Context, receiptId string) (model.
 	} else {
 		close(cashierChan)
 	}
-	order.Cashier = <-cashierChan
-	order.PaymentType = <-paymentChan
+	cashier := <-cashierChan
+	order.Cashier = &cashier
+	payment := <-paymentChan
+	order.PaymentType = &payment
 
 	return order, nil
 }

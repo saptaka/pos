@@ -24,8 +24,8 @@ type Order struct {
 	ReceiptIDFilePath string     `json:"-"`
 	CreatedAt         *time.Time `json:"createdAt"`
 	UpdatedAt         *time.Time `json:"updatedAt"`
-	Cashier           Cashier    `json:"cashier,omitempty"`
-	PaymentType       Payment    `json:"payment_type,omitempty"`
+	Cashier           *Cashier   `json:"cashier,omitempty"`
+	PaymentType       *Payment   `json:"payment_type,omitempty"`
 }
 
 type OrderedProductDetail struct {

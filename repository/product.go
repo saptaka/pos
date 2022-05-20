@@ -172,10 +172,6 @@ func (r repo) GetProducts(ctx context.Context,
 
 func (r repo) UpdateProduct(ctx context.Context,
 	Product model.Product) error {
-	_, err := r.GetProductByID(ctx, Product.ProductId)
-	if err != nil {
-		return err
-	}
 
 	query := `UPDATE products SET `
 	var countUpdate int
@@ -209,7 +205,7 @@ func (r repo) UpdateProduct(ctx context.Context,
 		return fmt.Errorf("nothing updated")
 	}
 
-	_, err = r.db.ExecContext(ctx, query, values...)
+	_, err := r.db.ExecContext(ctx, query, values...)
 	if err != nil {
 		return err
 	}
@@ -287,13 +283,8 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 }
 
 func (r repo) DeleteProduct(ctx context.Context, id int64) error {
-	_, err := r.GetProductByID(ctx, id)
-
-	if err != nil {
-		return err
-	}
 	query := "DELETE FROM products WHERE id=?"
-	_, err = r.db.ExecContext(ctx, query, id)
+	_, err := r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
