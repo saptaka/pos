@@ -1,6 +1,10 @@
 package api
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -12,6 +16,8 @@ const Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NDkzMTU5NzksInN1
 
 func middleware(next func(res http.ResponseWriter, req *http.Request)) func(res http.ResponseWriter, req *http.Request) {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+
+		printRequestBody(req)
 		reqToken := req.Header.Get("Authorization")
 		splitToken := strings.Split(reqToken, "JWT ")
 		if len(splitToken) < 2 {
@@ -38,4 +44,27 @@ func middleware(next func(res http.ResponseWriter, req *http.Request)) func(res 
 
 		next(res, req)
 	})
+}
+
+func printRequestBody(req *http.Request) {
+	var bodyBytes []byte
+	var err error
+
+	if req.Body != nil {
+		bodyBytes, err = ioutil.ReadAll(req.Body)
+		if err != nil {
+			fmt.Printf("Body reading error: %v", err)
+			return
+		}
+		defer req.Body.Close()
+	}
+
+	if len(bodyBytes) > 0 {
+		var prettyJSON bytes.Buffer
+		if err = json.Indent(&prettyJSON, bodyBytes, "", "\t"); err != nil {
+			fmt.Printf("JSON parse error: %v", err)
+			return
+		}
+		fmt.Println(prettyJSON.String())
+	}
 }

@@ -200,8 +200,8 @@ func (s service) generateOrderedProduct(
 		var product model.Product
 		var err error
 		productMapValue, ok := productCache.Get(productItem.ProductId)
-		if ok && productMapValue != nil {
-			product = *productMapValue
+		if ok {
+			product = productMapValue
 		} else {
 			product, err = s.db.GetProductByID(s.ctx, productItem.ProductId)
 			if err == sql.ErrNoRows {
@@ -224,7 +224,7 @@ func (s service) generateOrderedProduct(
 				product.ProductId, err)
 		}
 
-		productCache.Set(product.ProductId, &product)
+		productCache.Set(product.ProductId, product)
 
 		var finalPrice int
 		normalPrice := product.Price * productItem.Qty

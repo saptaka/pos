@@ -15,16 +15,16 @@ type syncMap struct {
 	m sync.Map
 }
 
-func (c *syncMap) Get(key int64) (*model.Product, bool) {
+func (c *syncMap) Get(key int64) (model.Product, bool) {
 	value, ok := c.m.Load(key)
 	if ok {
-		product := value.(*model.Product)
+		product := value.(model.Product)
 		return product, true
 	}
-	return nil, false
+	return model.Product{}, false
 }
 
-func (c *syncMap) Set(key int64, value *model.Product) {
+func (c *syncMap) Set(key int64, value model.Product) {
 	c.m.Store(key, value)
 }
 
@@ -78,7 +78,7 @@ func (s service) CreateProduct(productRequest model.Product) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusBadRequest, product)
 	}
 
-	productCache.Set(product.ProductId, &product)
+	productCache.Set(product.ProductId, product)
 
 	return utils.ResponseWrapper(http.StatusOK, product)
 }
@@ -93,7 +93,7 @@ func (s service) UpdateProduct(product model.Product) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 
-	productCache.Set(product.ProductId, &product)
+	productCache.Set(product.ProductId, product)
 
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }
@@ -113,7 +113,7 @@ func (s service) DeleteProduct(id int64) ([]byte, int) {
 func (s service) LoadProduct() error {
 	products, err := s.db.GetProducts(s.ctx, 0, 0, 0, "")
 	for _, product := range products {
-		productCache.Set(product.ProductId, &product)
+		productCache.Set(product.ProductId, product)
 	}
 	return err
 }
