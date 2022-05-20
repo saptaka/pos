@@ -37,7 +37,7 @@ type Product interface {
 }
 
 func (s service) ListProduct(limit, skip int, categoryID int64, query string) ([]byte, int) {
-	products, err := s.db.GetProducts(context.Background(), limit, skip, categoryID, query)
+	products, err := s.db.GetProducts(s.ctx, limit, skip, categoryID, query)
 	listProduct := model.ListProduct{
 		Products: products,
 		Meta: model.Meta{

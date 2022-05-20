@@ -80,7 +80,7 @@ func (r repo) GetProducts(ctx context.Context,
 				image,
 				category_id ,
 				sku,
-				discount_id,
+				discount_id
 			FROM products 
 			%s 
 			`
