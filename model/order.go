@@ -2,9 +2,15 @@ package model
 
 import "time"
 
-type Orders struct {
+type OrderDetails struct {
 	Order          Order                  `json:"order"`
 	OrderedProduct []OrderedProductDetail `json:"products,omitempty"`
+	Meta           Meta                   `json:"meta"`
+}
+
+type ListOrders struct {
+	Order []Order `json:"orders"`
+	Meta  Meta    `json:"meta"`
 }
 
 type Order struct {

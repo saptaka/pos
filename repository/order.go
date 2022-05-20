@@ -42,7 +42,7 @@ func (r repo) GetOrder(ctx context.Context, limit, skip int) ([]model.Order, err
 			created_at
 			FROM 
 			orders `
-		if skip != 0 {
+		if limit != 0 {
 			query += " LIMIT ? OFFSET ?;"
 			rows, err = r.db.QueryContext(ctx, query, limit, skip)
 			if err != nil {

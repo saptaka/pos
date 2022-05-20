@@ -32,7 +32,16 @@ func (s service) ListOrder(limit, skip int) ([]byte, int) {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, orders)
+	listOrders := model.ListOrders{
+		Order: orders,
+		Meta: model.Meta{
+			Limit: limit,
+			Skip:  skip,
+			Total: len(orders),
+		},
+	}
+
+	return utils.ResponseWrapper(http.StatusOK, listOrders)
 }
 
 func (s service) DetailOrder(id int64, receiptId string) ([]byte, int) {
@@ -93,12 +102,12 @@ func (s service) DetailOrder(id int64, receiptId string) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 
-	orders := model.Orders{
+	orderDetails := model.OrderDetails{
 		Order:          order,
 		OrderedProduct: orderedProducts,
 	}
 
-	return utils.ResponseWrapper(http.StatusOK, orders)
+	return utils.ResponseWrapper(http.StatusOK, orderDetails)
 }
 
 func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int) {
@@ -141,7 +150,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 
-	orders := model.Orders{
+	orders := model.OrderDetails{
 		Order:          order,
 		OrderedProduct: orderedProductDetails,
 	}
