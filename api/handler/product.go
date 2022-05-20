@@ -66,11 +66,6 @@ func (s service) DetailProduct(id int64) ([]byte, int) {
 }
 
 func (s service) CreateProduct(productRequest model.Product) ([]byte, int) {
-	err := s.validation.Struct(productRequest)
-	if err != nil {
-		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
-	}
 
 	product, err := s.db.CreateProduct(s.ctx, productRequest)
 	if err != nil {
