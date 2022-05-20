@@ -27,15 +27,15 @@ type Product struct {
 }
 
 type ProductCreateResponse struct {
-	ProductId    int64      `json:"productId"`
-	Name         string     `json:"name" validate:"required"`
-	Stock        int        `json:"stock,omitempty" validate:"required"`
-	Price        int        `json:"price" validate:"required"`
-	Image        string     `json:"image,omitempty"`
-	SKU          string     `json:"sku,omitempty"`
-	UpdatedAt    *time.Time `json:"updatedAt,omitempty"`
-	CreatedAt    *time.Time `json:"createdAt,omitempty"`
-	CategoriesId *int64     `json:"categoriesId"`
+	ProductId  int64      `json:"productId"`
+	Name       string     `json:"name" validate:"required"`
+	Stock      int        `json:"stock,omitempty" validate:"required"`
+	Price      int        `json:"price" validate:"required"`
+	Image      string     `json:"image,omitempty"`
+	SKU        string     `json:"sku,omitempty"`
+	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
+	CreatedAt  *time.Time `json:"createdAt,omitempty"`
+	CategoryId *int64     `json:"categoryId"`
 }
 
 type Discount struct {
