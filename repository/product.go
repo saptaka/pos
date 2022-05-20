@@ -87,10 +87,10 @@ func (r repo) GetProducts(ctx context.Context,
 		var withQuery string
 		values := make([]interface{}, 0)
 		if query != "" && categoryID != 0 {
-			withQuery = " WHERE name=? AND category_id=?"
+			withQuery = " WHERE name LIKE CONCAT('%',?,'%') AND category_id=?"
 			values = append(values, query, categoryID)
 		} else if query != "" {
-			withQuery = " WHERE name=?"
+			withQuery = " WHERE name LIKE CONCAT('%',?,'%')"
 			values = append(values, query)
 		} else if categoryID != 0 {
 			withQuery = " WHERE category_id=?"
