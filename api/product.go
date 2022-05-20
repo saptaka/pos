@@ -68,7 +68,7 @@ func (r *router) DetailProduct(res http.ResponseWriter, req *http.Request) {
 
 func (r *router) CreateProduct(res http.ResponseWriter, req *http.Request) {
 
-	var product model.Product
+	var product model.ProductCreateRequest
 	err := json.NewDecoder(req.Body).Decode(&product)
 	if err != nil {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)

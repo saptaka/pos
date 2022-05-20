@@ -31,7 +31,7 @@ func (c *syncMap) Set(key int64, value model.Product) {
 type Product interface {
 	ListProduct(limit, skip int, categoryID int64, query string) ([]byte, int)
 	DetailProduct(id int64) ([]byte, int)
-	CreateProduct(product model.Product) ([]byte, int)
+	CreateProduct(product model.ProductCreateRequest) ([]byte, int)
 	UpdateProduct(product model.Product) ([]byte, int)
 	DeleteProduct(id int64) ([]byte, int)
 }
@@ -65,7 +65,7 @@ func (s service) DetailProduct(id int64) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, Product)
 }
 
-func (s service) CreateProduct(productRequest model.Product) ([]byte, int) {
+func (s service) CreateProduct(productRequest model.ProductCreateRequest) ([]byte, int) {
 
 	product, err := s.db.CreateProduct(s.ctx, productRequest)
 	if err != nil {
@@ -75,7 +75,18 @@ func (s service) CreateProduct(productRequest model.Product) ([]byte, int) {
 
 	productCache.Set(product.ProductId, product)
 
-	return utils.ResponseWrapper(http.StatusOK, product)
+	productCreatedResponse := model.ProductCreateResponse{
+		ProductId:    product.ProductId,
+		Stock:        product.Stock,
+		SKU:          product.SKU,
+		Price:        product.Price,
+		Image:        product.Image,
+		CreatedAt:    product.CreatedAt,
+		UpdatedAt:    product.UpdatedAt,
+		CategoriesId: product.CategoryId,
+	}
+
+	return utils.ResponseWrapper(http.StatusOK, productCreatedResponse)
 }
 
 func (s service) UpdateProduct(product model.Product) ([]byte, int) {

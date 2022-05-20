@@ -2,6 +2,15 @@ package model
 
 import "time"
 
+type ProductCreateRequest struct {
+	Name       string    `json:"name" validate:"required"`
+	Stock      int       `json:"stock,omitempty" validate:"required"`
+	Price      int       `json:"price" validate:"required"`
+	Image      string    `json:"image,omitempty"`
+	CategoryId *int64    `json:"categoryId"`
+	Discount   *Discount `json:"discount"`
+}
+
 type Product struct {
 	ProductId  int64      `json:"productId"`
 	Name       string     `json:"name" validate:"required"`
@@ -9,12 +18,24 @@ type Product struct {
 	Price      int        `json:"price" validate:"required"`
 	Image      string     `json:"image,omitempty"`
 	SKU        string     `json:"sku,omitempty"`
-	DiscountId *int64     `json:"-"`
-	CategoryId *int64     `json:"-"`
 	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
 	CreatedAt  *time.Time `json:"createdAt,omitempty"`
+	DiscountId *int64     `json:"-"`
+	CategoryId *int64     `json:"-"`
 	Discount   *Discount  `json:"discount"`
 	Category   *Category  `json:"category"`
+}
+
+type ProductCreateResponse struct {
+	ProductId    int64      `json:"productId"`
+	Name         string     `json:"name" validate:"required"`
+	Stock        int        `json:"stock,omitempty" validate:"required"`
+	Price        int        `json:"price" validate:"required"`
+	Image        string     `json:"image,omitempty"`
+	SKU          string     `json:"sku,omitempty"`
+	UpdatedAt    *time.Time `json:"updatedAt,omitempty"`
+	CreatedAt    *time.Time `json:"createdAt,omitempty"`
+	CategoriesId *int64     `json:"categoriesId"`
 }
 
 type Discount struct {

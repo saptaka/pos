@@ -15,7 +15,7 @@ type ProductRepo interface {
 	GetProductByID(ctx context.Context, id int64) (model.Product, error)
 	GetProducts(ctx context.Context, limit, skip int, categoryID int64, query string) ([]model.Product, error)
 	UpdateProduct(ctx context.Context, product model.Product) error
-	CreateProduct(ctx context.Context, product model.Product) (model.Product, error)
+	CreateProduct(ctx context.Context, product model.ProductCreateRequest) (model.Product, error)
 	DeleteProduct(ctx context.Context, id int64) error
 	GetProductsByIds(ctx context.Context, ids []int64) ([]model.Product, error)
 }
@@ -224,14 +224,14 @@ func (r repo) UpdateProduct(ctx context.Context,
 	return nil
 }
 
-func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.Product, error) {
+func (r repo) CreateProduct(ctx context.Context, product model.ProductCreateRequest) (model.Product, error) {
 
 	var productDetail model.Product
 
 	insertQuery := `INSERT INTO 
-		products (name,image, price, stock, discount_id, category_id,
+		products (name,image, price, stock, category_id,
 			 updated_at, created_at) 
-	VALUES (?,?,?,?,?,?,?,?);`
+	VALUES (?,?,?,?,?,?,?);`
 
 	stmt, err := r.db.PrepareContext(ctx, insertQuery)
 	if err != nil {
@@ -245,7 +245,6 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 		product.Image,
 		product.Price,
 		product.Stock,
-		product.DiscountId,
 		product.CategoryId,
 		now,
 		now,
@@ -282,15 +281,17 @@ func (r repo) CreateProduct(ctx context.Context, product model.Product) (model.P
 	}(r, id, product.Discount)
 
 	productDetail = model.Product{
-		ProductId:  id,
-		Name:       product.Name,
-		Stock:      product.Stock,
-		SKU:        fmt.Sprintf("ID%03d", id),
-		Price:      product.Price,
-		Image:      product.Image,
+
+		ProductId: id,
+		Name:      product.Name,
+		Stock:     product.Stock,
+		SKU:       fmt.Sprintf("ID%03d", id),
+		Price:     product.Price,
+		Image:     product.Image,
+		UpdatedAt: &now,
+		CreatedAt: &now,
+
 		CategoryId: product.CategoryId,
-		UpdatedAt:  &now,
-		CreatedAt:  &now,
 	}
 
 	return productDetail, err
