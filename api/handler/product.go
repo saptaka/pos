@@ -76,14 +76,14 @@ func (s service) CreateProduct(productRequest model.ProductCreateRequest) ([]byt
 	productCache.Set(product.ProductId, product)
 
 	productCreatedResponse := model.ProductCreateResponse{
-		ProductId:    product.ProductId,
-		Stock:        product.Stock,
-		SKU:          product.SKU,
-		Price:        product.Price,
-		Image:        product.Image,
-		CreatedAt:    product.CreatedAt,
-		UpdatedAt:    product.UpdatedAt,
-		CategoriesId: product.CategoryId,
+		ProductId:  product.ProductId,
+		Stock:      product.Stock,
+		SKU:        product.SKU,
+		Price:      product.Price,
+		Image:      product.Image,
+		CreatedAt:  product.CreatedAt,
+		UpdatedAt:  product.UpdatedAt,
+		CategoryId: product.CategoryId,
 	}
 
 	return utils.ResponseWrapper(http.StatusOK, productCreatedResponse)
