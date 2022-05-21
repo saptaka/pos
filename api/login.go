@@ -25,10 +25,10 @@ func (r *apiRouter) RouteLoginPath() {
 
 func (r *apiRouter) GetPasscode(req *fasthttp.RequestCtx) {
 	req.Response.Header.SetCanonical(model.ContentTypeJSON())
-	idParams := string(req.URI().QueryArgs().Peek("cashierId"))
+	idParams := req.UserValue("cashierId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return

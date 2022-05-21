@@ -26,9 +26,12 @@ func (s *server) Listen(port int) {
 	// loggingRouter := handlers.LoggingHandler(os.Stdout, s.mux)
 	log.Printf("Starting POS server on PORT : %d", port)
 	srv := &fasthttp.Server{
-		ReadTimeout:  180 * time.Second,
-		WriteTimeout: 180 * time.Second,
-		Handler:      s.mux.Handler,
+		ReadTimeout:        180 * time.Second,
+		WriteTimeout:       180 * time.Second,
+		MaxRequestsPerConn: 1500,
+		Concurrency:        1500,
+		MaxConnsPerIP:      1500,
+		Handler:            s.mux.Handler,
 	}
 
 	err := srv.ListenAndServe(fmt.Sprintf(":%d", port))
