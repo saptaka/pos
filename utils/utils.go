@@ -2,8 +2,10 @@ package utils
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 
 	"github.com/saptaka/pos/model"
 )
@@ -46,4 +48,14 @@ func ResponseWrapper(statusCode int, data interface{}) ([]byte, int) {
 	}
 
 	return jsonData, statusCode
+}
+
+func FormatCommas(num int) string {
+	str := fmt.Sprintf("%d", num)
+	re := regexp.MustCompile(`(\d+)(\d{3})`)
+	for n := ""; n != str; {
+		n = str
+		str = re.ReplaceAllString(str, "$1,$2")
+	}
+	return str
 }

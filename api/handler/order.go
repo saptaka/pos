@@ -277,13 +277,12 @@ func (s service) generateSubOrderedProduct(
 		totalPrice += finalPrice
 		orderedProductDetail := model.SubOrderedProductDetail{
 			Product: model.Product{
-				ProductId:  product.ProductId,
-				Name:       product.Name,
-				Price:      totalPrice,
-				DiscountId: product.DiscountId,
-				Discount:   discount,
-				Stock:      product.Stock,
-				Image:      product.Image,
+				ProductId: product.ProductId,
+				Name:      product.Name,
+				Price:     totalPrice,
+				Discount:  discount,
+				Stock:     product.Stock,
+				Image:     product.Image,
 			},
 			Qty:              productItem.Qty,
 			TotalFinalPrice:  finalPrice,

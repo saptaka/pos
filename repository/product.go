@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/saptaka/pos/model"
+	"github.com/saptaka/pos/utils"
 )
 
 type ProductRepo interface {
@@ -59,12 +60,13 @@ func (r repo) GetProductByID(ctx context.Context, id int64) (model.Product, erro
 
 		if discount.Type == model.BuyN {
 			discount.StringFormat = fmt.Sprintf("Buy %d only Rp. %s",
-				discount.Qty, fmt.Sprintf("%d", discount.Result))
+				discount.Qty, utils.FormatCommas(discount.Result))
 		} else {
 			discountResult := fmt.Sprint(discount.Result, "%")
 			discountPrice := product.Price - (product.Price * discount.Result / 100)
+
 			discount.StringFormat = fmt.Sprintf("Discount %s Rp. %s",
-				discountResult, fmt.Sprintf("%d", discountPrice))
+				discountResult, utils.FormatCommas(discountPrice))
 		}
 
 		discountById = &discount
@@ -169,12 +171,12 @@ func (r repo) GetProducts(ctx context.Context,
 
 				if discount.Type == model.BuyN {
 					discount.StringFormat = fmt.Sprintf("Buy %d only Rp. %s",
-						discount.Qty, fmt.Sprintf("%d", discount.Result))
+						discount.Qty, utils.FormatCommas(discount.Result))
 				} else {
 					discountResult := fmt.Sprint(discount.Result, "%")
 					discountPrice := product.Price - (product.Price * discount.Result / 100)
 					discount.StringFormat = fmt.Sprintf("Discount %s Rp. %s",
-						discountResult, fmt.Sprintf("%d", discountPrice))
+						discountResult, utils.FormatCommas(discountPrice))
 				}
 
 				product.Discount = &discount
