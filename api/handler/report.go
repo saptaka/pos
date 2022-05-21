@@ -7,11 +7,11 @@ import (
 )
 
 type Report interface {
-	Revenue() ([]byte, int)
-	Solds() ([]byte, int)
+	Revenue() (map[string]interface{}, int)
+	Solds() (map[string]interface{}, int)
 }
 
-func (s service) Revenue() ([]byte, int) {
+func (s service) Revenue() (map[string]interface{}, int) {
 	revenue, err := s.db.GetRevenues(s.ctx)
 	if err != nil {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
@@ -19,7 +19,7 @@ func (s service) Revenue() ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, revenue)
 }
 
-func (s service) Solds() ([]byte, int) {
+func (s service) Solds() (map[string]interface{}, int) {
 	sold, err := s.db.GetSolds(s.ctx)
 	if err != nil {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)

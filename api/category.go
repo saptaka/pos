@@ -5,131 +5,126 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
 	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
+	"github.com/valyala/fasthttp"
 )
 
 type CategoryRouter interface {
-	ListCategory(res http.ResponseWriter, req *http.Request)
-	DetailCategory(res http.ResponseWriter, req *http.Request)
-	CreateCategory(res http.ResponseWriter, req *http.Request)
-	UpdateCategory(res http.ResponseWriter, req *http.Request)
-	DeleteCategory(res http.ResponseWriter, req *http.Request)
+	ListCategory(req *fasthttp.RequestCtx)
+	DetailCategory(req *fasthttp.RequestCtx)
+	CreateCategory(req *fasthttp.RequestCtx)
+	UpdateCategory(req *fasthttp.RequestCtx)
+	DeleteCategory(req *fasthttp.RequestCtx)
 	RouteCategoryPath()
 }
 
-func (r *router) RouteCategoryPath() {
-	r.mux.HandleFunc("/categories", middleware(r.ListCategory)).Methods("GET")
-	r.mux.HandleFunc("/categories/{categoryId}", middleware(r.DetailCategory)).Methods("GET")
-	r.mux.HandleFunc("/categories", r.CreateCategory).Methods("POST")
-	r.mux.HandleFunc("/categories/{categoryId}", r.UpdateCategory).Methods("PUT")
-	r.mux.HandleFunc("/categories/{categoryId}", r.DeleteCategory).Methods("DELETE")
+func (r *apiRouter) RouteCategoryPath() {
+	r.mux.GET("/categories", middleware(r.ListCategory))
+	r.mux.GET("/categories/{categoryId}", middleware(r.DetailCategory))
+	r.mux.POST("/categories", r.CreateCategory)
+	r.mux.PUT("/categories/{categoryId}", r.UpdateCategory)
+	r.mux.DELETE("/categories/{categoryId}", r.DeleteCategory)
 }
 
-func (r *router) ListCategory(res http.ResponseWriter, req *http.Request) {
-
-	limitQuery := req.URL.Query().Get("limit")
-	skipQuery := req.URL.Query().Get("skip")
+func (r *apiRouter) ListCategory(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+	limitQuery := string(req.URI().QueryArgs().Peek("limit"))
+	skipQuery := string(req.URI().QueryArgs().Peek("skip"))
 	limit, _ := strconv.Atoi(limitQuery)
 	skip, _ := strconv.Atoi(skipQuery)
 	response, statusCode := r.handlerService.ListCategory(limit, skip)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) DetailCategory(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["categoryId"]
+func (r *apiRouter) DetailCategory(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+	idParams := req.UserValue("categoryId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	response, statusCode := r.handlerService.DetailCategory(id)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) CreateCategory(res http.ResponseWriter, req *http.Request) {
-
+func (r *apiRouter) CreateCategory(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
 	var category model.Category
-	err := json.NewDecoder(req.Body).Decode(&category)
+	err := json.Unmarshal(req.Request.Body(), &category)
 	if err != nil {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 
 	response, statusCode := r.handlerService.CreateCategory(category)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) UpdateCategory(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["categoryId"]
+func (r *apiRouter) UpdateCategory(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+	idParams := req.UserValue("categoryId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 
 	var category model.Category
-	err := json.NewDecoder(req.Body).Decode(&category)
+	err := json.Unmarshal(req.Request.Body(), &category)
 	if err != nil {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	category.CategoryId = id
 	response, statusCode := r.handlerService.UpdateCategory(category)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) DeleteCategory(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["categoryId"]
+func (r *apiRouter) DeleteCategory(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+	idParams := req.UserValue("categoryId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	response, statusCode := r.handlerService.DeleteCategory(id)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }

@@ -11,14 +11,14 @@ import (
 )
 
 type Payment interface {
-	ListPayment(limit, skip int) ([]byte, int)
-	DetailPayment(id int64) ([]byte, int)
-	CreatePayment(payment model.Payment) ([]byte, int)
-	UpdatePayment(payment model.Payment) ([]byte, int)
-	DeletePayment(id int) ([]byte, int)
+	ListPayment(limit, skip int) (map[string]interface{}, int)
+	DetailPayment(id int64) (map[string]interface{}, int)
+	CreatePayment(payment model.Payment) (map[string]interface{}, int)
+	UpdatePayment(payment model.Payment) (map[string]interface{}, int)
+	DeletePayment(id int) (map[string]interface{}, int)
 }
 
-func (s service) ListPayment(limit, skip int) ([]byte, int) {
+func (s service) ListPayment(limit, skip int) (map[string]interface{}, int) {
 	Payments, err := s.db.GetPayments(context.Background(), limit, skip)
 	if err != nil {
 		log.Println(err)
@@ -36,7 +36,7 @@ func (s service) ListPayment(limit, skip int) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, listPayment)
 }
 
-func (s service) DetailPayment(id int64) ([]byte, int) {
+func (s service) DetailPayment(id int64) (map[string]interface{}, int) {
 	payment, err := s.db.GetPaymentByID(context.Background(), id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
@@ -48,7 +48,7 @@ func (s service) DetailPayment(id int64) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, payment)
 }
 
-func (s service) CreatePayment(payment model.Payment) ([]byte, int) {
+func (s service) CreatePayment(payment model.Payment) (map[string]interface{}, int) {
 	err := s.validation.Struct(payment)
 	if err != nil {
 		log.Println(err)
@@ -66,7 +66,7 @@ func (s service) CreatePayment(payment model.Payment) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, paymentData)
 }
 
-func (s service) UpdatePayment(payment model.Payment) ([]byte, int) {
+func (s service) UpdatePayment(payment model.Payment) (map[string]interface{}, int) {
 	err := s.db.UpdatePayment(s.ctx, payment)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
@@ -78,7 +78,7 @@ func (s service) UpdatePayment(payment model.Payment) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }
 
-func (s service) DeletePayment(id int) ([]byte, int) {
+func (s service) DeletePayment(id int) (map[string]interface{}, int) {
 	err := s.db.DeletePayment(s.ctx, id)
 	if err != nil {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)

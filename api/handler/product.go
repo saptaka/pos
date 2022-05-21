@@ -29,14 +29,14 @@ func (c *syncMap) Set(key int64, value model.Product) {
 }
 
 type Product interface {
-	ListProduct(limit, skip int, product model.Product) ([]byte, int)
-	DetailProduct(id int64) ([]byte, int)
-	CreateProduct(product model.ProductCreateRequest) ([]byte, int)
-	UpdateProduct(product model.Product) ([]byte, int)
-	DeleteProduct(id int64) ([]byte, int)
+	ListProduct(limit, skip int, product model.Product) (map[string]interface{}, int)
+	DetailProduct(id int64) (map[string]interface{}, int)
+	CreateProduct(product model.ProductCreateRequest) (map[string]interface{}, int)
+	UpdateProduct(product model.Product) (map[string]interface{}, int)
+	DeleteProduct(id int64) (map[string]interface{}, int)
 }
 
-func (s service) ListProduct(limit, skip int, product model.Product) ([]byte, int) {
+func (s service) ListProduct(limit, skip int, product model.Product) (map[string]interface{}, int) {
 	products, err := s.db.GetProducts(s.ctx, limit, skip, product)
 
 	listProduct := model.ListProduct{
@@ -54,7 +54,7 @@ func (s service) ListProduct(limit, skip int, product model.Product) ([]byte, in
 	return utils.ResponseWrapper(http.StatusOK, listProduct)
 }
 
-func (s service) DetailProduct(id int64) ([]byte, int) {
+func (s service) DetailProduct(id int64) (map[string]interface{}, int) {
 	Product, err := s.db.GetProductByID(context.Background(), id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
@@ -66,7 +66,7 @@ func (s service) DetailProduct(id int64) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, Product)
 }
 
-func (s service) CreateProduct(productRequest model.ProductCreateRequest) ([]byte, int) {
+func (s service) CreateProduct(productRequest model.ProductCreateRequest) (map[string]interface{}, int) {
 
 	product, err := s.db.CreateProduct(s.ctx, productRequest)
 	if err != nil {
@@ -91,7 +91,7 @@ func (s service) CreateProduct(productRequest model.ProductCreateRequest) ([]byt
 	return utils.ResponseWrapper(http.StatusOK, productCreatedResponse)
 }
 
-func (s service) UpdateProduct(product model.Product) ([]byte, int) {
+func (s service) UpdateProduct(product model.Product) (map[string]interface{}, int) {
 	err := s.db.UpdateProduct(s.ctx, product)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
@@ -106,7 +106,7 @@ func (s service) UpdateProduct(product model.Product) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }
 
-func (s service) DeleteProduct(id int64) ([]byte, int) {
+func (s service) DeleteProduct(id int64) (map[string]interface{}, int) {
 	err := s.db.DeleteProduct(s.ctx, id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)

@@ -12,14 +12,14 @@ import (
 )
 
 type Cashier interface {
-	ListCashier(limit, skip int) ([]byte, int)
-	DetailCashier(id int64) ([]byte, int)
-	CreateCashier(cashier model.Cashier) ([]byte, int)
-	UpdateCashier(cashier model.Cashier) ([]byte, int)
-	DeleteCashier(id int64) ([]byte, int)
+	ListCashier(limit, skip int) (map[string]interface{}, int)
+	DetailCashier(id int64) (map[string]interface{}, int)
+	CreateCashier(cashier model.Cashier) (map[string]interface{}, int)
+	UpdateCashier(cashier model.Cashier) (map[string]interface{}, int)
+	DeleteCashier(id int64) (map[string]interface{}, int)
 }
 
-func (s service) ListCashier(limit, skip int) ([]byte, int) {
+func (s service) ListCashier(limit, skip int) (map[string]interface{}, int) {
 	cashiers, err := s.db.GetCashiers(context.Background(), limit, skip)
 	if err != nil {
 		log.Println(err)
@@ -37,7 +37,7 @@ func (s service) ListCashier(limit, skip int) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, listCashier)
 }
 
-func (s service) DetailCashier(id int64) ([]byte, int) {
+func (s service) DetailCashier(id int64) (map[string]interface{}, int) {
 	cashier, err := s.db.GetCashierByID(context.Background(), id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
@@ -49,7 +49,7 @@ func (s service) DetailCashier(id int64) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, cashier)
 }
 
-func (s service) CreateCashier(cashierDetail model.Cashier) ([]byte, int) {
+func (s service) CreateCashier(cashierDetail model.Cashier) (map[string]interface{}, int) {
 	err := s.validation.Struct(cashierDetail)
 	if err != nil {
 		log.Println(err)
@@ -67,7 +67,7 @@ func (s service) CreateCashier(cashierDetail model.Cashier) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, cashier)
 }
 
-func (s service) UpdateCashier(cashierDetail model.Cashier) ([]byte, int) {
+func (s service) UpdateCashier(cashierDetail model.Cashier) (map[string]interface{}, int) {
 
 	err := s.db.UpdateCashier(s.ctx, cashierDetail)
 	if err == sql.ErrNoRows {
@@ -80,7 +80,7 @@ func (s service) UpdateCashier(cashierDetail model.Cashier) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }
 
-func (s service) DeleteCashier(id int64) ([]byte, int) {
+func (s service) DeleteCashier(id int64) (map[string]interface{}, int) {
 	err := s.db.DeleteCashier(s.ctx, id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)

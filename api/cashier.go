@@ -5,132 +5,131 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
 	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
+	"github.com/valyala/fasthttp"
 )
 
 type CashierRouter interface {
-	ListCashier(res http.ResponseWriter, req *http.Request)
-	DetailCashier(res http.ResponseWriter, req *http.Request)
-	CreateCashier(res http.ResponseWriter, req *http.Request)
-	UpdateCashier(res http.ResponseWriter, req *http.Request)
-	DeleteCashier(res http.ResponseWriter, req *http.Request)
+	ListCashier(req *fasthttp.RequestCtx)
+	DetailCashier(req *fasthttp.RequestCtx)
+	CreateCashier(req *fasthttp.RequestCtx)
+	UpdateCashier(req *fasthttp.RequestCtx)
+	DeleteCashier(req *fasthttp.RequestCtx)
 	RouteCashierPath()
 }
 
-func (r *router) RouteCashierPath() {
-	r.mux.HandleFunc("/cashiers", r.ListCashier).Methods("GET")
-	r.mux.HandleFunc("/cashiers/{cashierId}", r.DetailCashier).Methods("GET")
-	r.mux.HandleFunc("/cashiers", r.CreateCashier).Methods("POST")
-	r.mux.HandleFunc("/cashiers/{cashierId}", r.UpdateCashier).Methods("PUT")
-	r.mux.HandleFunc("/cashiers/{cashierId}", r.DeleteCashier).Methods("DELETE")
+func (r *apiRouter) RouteCashierPath() {
+	r.mux.GET("/cashiers", r.ListCashier)
+	r.mux.GET("/cashiers/{cashierId}", r.DetailCashier)
+	r.mux.POST("/cashiers", r.CreateCashier)
+	r.mux.PUT("/cashiers/{cashierId}", r.UpdateCashier)
+	r.mux.DELETE("/cashiers/{cashierId}", r.DeleteCashier)
 }
 
-func (r *router) ListCashier(res http.ResponseWriter, req *http.Request) {
-
-	limitQuery := req.URL.Query().Get("limit")
-	skipQuery := req.URL.Query().Get("skip")
-	limit, _ := strconv.Atoi(limitQuery)
-	skip, _ := strconv.Atoi(skipQuery)
+func (r *apiRouter) ListCashier(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+	limitQuery := req.URI().QueryArgs().Peek("limit")
+	skipQuery := req.URI().QueryArgs().Peek("skip")
+	limit, _ := strconv.Atoi(string(limitQuery))
+	skip, _ := strconv.Atoi(string(skipQuery))
 	response, statusCode := r.handlerService.ListCashier(limit, skip)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		response, statusCode := utils.ResponseWrapper(fasthttp.StatusBadRequest, "")
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) DetailCashier(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["cashierId"]
+func (r *apiRouter) DetailCashier(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+	idParams := req.UserValue("cashierId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	response, statusCode := r.handlerService.DetailCashier(id)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) CreateCashier(res http.ResponseWriter, req *http.Request) {
-
+func (r *apiRouter) CreateCashier(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
 	var cashierRequest model.Cashier
-	err := json.NewDecoder(req.Body).Decode(&cashierRequest)
+	err := json.Unmarshal(req.Request.Body(), &cashierRequest)
 	if err != nil {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 
 	response, statusCode := r.handlerService.CreateCashier(cashierRequest)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) UpdateCashier(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["cashierId"]
+func (r *apiRouter) UpdateCashier(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+	idParams := req.UserValue("cashierId").(string)
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
-		res.Write(response)
+		req.Response.Header.SetCanonical(model.ContentTypeJSON())
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 
 	var cashierDetail model.Cashier
-	err := json.NewDecoder(req.Body).Decode(&cashierDetail)
+	err := json.Unmarshal(req.Request.Body(), &cashierDetail)
 	if err != nil {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.Header.SetCanonical(model.ContentTypeJSON())
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	cashierDetail.CashierId = int64(id)
 	response, statusCode := r.handlerService.UpdateCashier(cashierDetail)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.Header.SetCanonical(model.ContentTypeJSON())
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) DeleteCashier(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["cashierId"]
+func (r *apiRouter) DeleteCashier(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+	idParams := req.UserValue("cashierId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	response, statusCode := r.handlerService.DeleteCashier(id)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }

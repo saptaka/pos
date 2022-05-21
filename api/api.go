@@ -3,8 +3,8 @@ package api
 import (
 	"context"
 
+	"github.com/fasthttp/router"
 	"github.com/go-playground/validator"
-	"github.com/gorilla/mux"
 	"github.com/saptaka/pos/api/handler"
 	"github.com/saptaka/pos/repository"
 )
@@ -14,13 +14,13 @@ type Service interface {
 }
 
 type service struct {
-	routerHandler Router
+	routerHandler ApiRouter
 }
 
-func NewAPI(ctx context.Context, mux *mux.Router, repo repository.Repo) Service {
+func NewAPI(ctx context.Context, mux *router.Router, repo repository.Repo) Service {
 	validation := validator.New()
 	handlerService := handler.NewHandler(ctx, repo, validation)
-	routerHandler := &router{handlerService, mux}
+	routerHandler := &apiRouter{handlerService, mux}
 	return &service{routerHandler}
 }
 
@@ -34,12 +34,12 @@ func (s *service) Route() {
 	s.routerHandler.RouteOrderPath()
 }
 
-type router struct {
+type apiRouter struct {
 	handlerService handler.Service
-	mux            *mux.Router
+	mux            *router.Router
 }
 
-type Router interface {
+type ApiRouter interface {
 	CashierRouter
 	CategoryRouter
 	LoginRouter
@@ -50,6 +50,6 @@ type Router interface {
 	ReportRouter
 }
 
-func NewRouter() Router {
-	return &router{}
+func NewRouter() ApiRouter {
+	return &apiRouter{}
 }

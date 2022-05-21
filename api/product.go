@@ -5,34 +5,35 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
 	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
+	"github.com/valyala/fasthttp"
 )
 
 type ProductRouter interface {
-	ListProduct(res http.ResponseWriter, req *http.Request)
-	DetailProduct(res http.ResponseWriter, req *http.Request)
-	CreateProduct(res http.ResponseWriter, req *http.Request)
-	UpdateProduct(res http.ResponseWriter, req *http.Request)
-	DeleteProduct(res http.ResponseWriter, req *http.Request)
+	ListProduct(req *fasthttp.RequestCtx)
+	DetailProduct(req *fasthttp.RequestCtx)
+	CreateProduct(req *fasthttp.RequestCtx)
+	UpdateProduct(req *fasthttp.RequestCtx)
+	DeleteProduct(req *fasthttp.RequestCtx)
 	RouteProductPath()
 }
 
-func (r *router) RouteProductPath() {
-	r.mux.HandleFunc("/products", middleware(r.ListProduct)).Methods("GET")
-	r.mux.HandleFunc("/products/{productId}", middleware(r.DetailProduct)).Methods("GET")
-	r.mux.HandleFunc("/products", r.CreateProduct).Methods("POST")
-	r.mux.HandleFunc("/products/{productId}", (r.UpdateProduct)).Methods("PUT")
-	r.mux.HandleFunc("/products/{productId}", r.DeleteProduct).Methods("DELETE")
+func (r *apiRouter) RouteProductPath() {
+	r.mux.GET("/products", middleware(r.ListProduct))
+	r.mux.GET("/products/{productId}", middleware(r.DetailProduct))
+	r.mux.POST("/products", r.CreateProduct)
+	r.mux.PUT("/products/{productId}", (r.UpdateProduct))
+	r.mux.DELETE("/products/{productId}", r.DeleteProduct)
 }
 
-func (r *router) ListProduct(res http.ResponseWriter, req *http.Request) {
+func (r *apiRouter) ListProduct(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
 
-	limitQuery := req.URL.Query().Get("limit")
-	skipQuery := req.URL.Query().Get("skip")
-	query := req.URL.Query().Get("q")
-	categoryIdParams := req.URL.Query().Get("categoryId")
+	limitQuery := string(req.URI().QueryArgs().Peek("limit"))
+	skipQuery := string(req.URI().QueryArgs().Peek("skip"))
+	query := string(req.URI().QueryArgs().Peek("q"))
+	categoryIdParams := string(req.URI().QueryArgs().Peek("categoryId"))
 	limit, _ := strconv.Atoi(limitQuery)
 	skip, _ := strconv.Atoi(skipQuery)
 	categoryId, err := strconv.ParseInt(categoryIdParams, 10, 0)
@@ -48,100 +49,99 @@ func (r *router) ListProduct(res http.ResponseWriter, req *http.Request) {
 	}
 	response, statusCode := r.handlerService.ListProduct(limit, skip, product)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) DetailProduct(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["productId"]
+func (r *apiRouter) DetailProduct(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+
+	idParams := req.UserValue("productId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	response, statusCode := r.handlerService.DetailProduct(id)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) CreateProduct(res http.ResponseWriter, req *http.Request) {
+func (r *apiRouter) CreateProduct(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
 
 	var product model.ProductCreateRequest
-	err := json.NewDecoder(req.Body).Decode(&product)
+	err := json.Unmarshal(req.Request.Body(), &product)
 	if err != nil {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 
 	response, statusCode := r.handlerService.CreateProduct(product)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) UpdateProduct(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["productId"]
+func (r *apiRouter) UpdateProduct(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+
+	idParams := req.UserValue("productId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	var product model.Product
-	err := json.NewDecoder(req.Body).Decode(&product)
+	err := json.Unmarshal(req.Request.Body(), &product)
 	if err != nil {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	product.ProductId = id
 	response, statusCode := r.handlerService.UpdateProduct(product)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) DeleteProduct(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["productId"]
+func (r *apiRouter) DeleteProduct(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+
+	idParams := req.UserValue("productId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	response, statusCode := r.handlerService.DeleteProduct(id)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }

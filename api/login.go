@@ -5,97 +5,94 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
 	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
+	"github.com/valyala/fasthttp"
 )
 
 type LoginRouter interface {
-	GetPasscode(res http.ResponseWriter, req *http.Request)
-	VerifyLogin(res http.ResponseWriter, req *http.Request)
-	VerifyLogout(res http.ResponseWriter, req *http.Request)
+	GetPasscode(req *fasthttp.RequestCtx)
+	VerifyLogin(req *fasthttp.RequestCtx)
+	VerifyLogout(req *fasthttp.RequestCtx)
 	RouteLoginPath()
 }
 
-func (r *router) RouteLoginPath() {
-	r.mux.HandleFunc("/cashiers/{cashierId}/passcode", r.GetPasscode).Methods("GET")
-	r.mux.HandleFunc("/cashiers/{cashierId}/login", r.VerifyLogin).Methods("POST")
-	r.mux.HandleFunc("/cashiers/{cashierId}/logout", r.VerifyLogout).Methods("POST")
+func (r *apiRouter) RouteLoginPath() {
+	r.mux.GET("/cashiers/{cashierId}/passcode", r.GetPasscode)
+	r.mux.POST("/cashiers/{cashierId}/login", r.VerifyLogin)
+	r.mux.POST("/cashiers/{cashierId}/logout", r.VerifyLogout)
 }
 
-func (r *router) GetPasscode(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["cashierId"]
+func (r *apiRouter) GetPasscode(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+	idParams := string(req.URI().QueryArgs().Peek("cashierId"))
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 
 	response, statusCode := r.handlerService.GetPasscode(id)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) VerifyLogin(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["cashierId"]
+func (r *apiRouter) VerifyLogin(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+	idParams := req.UserValue("cashierId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	var cashier model.Cashier
-	err := json.NewDecoder(req.Body).Decode(&cashier)
+	err := json.Unmarshal(req.Request.Body(), &cashier)
 	if err != nil {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	response, statusCode := r.handlerService.VerifyLogin(id, cashier.Passcode, Token)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) VerifyLogout(res http.ResponseWriter, req *http.Request) {
-	params := mux.Vars(req)
-	idParams := params["cashierId"]
+func (r *apiRouter) VerifyLogout(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
+	idParams := req.UserValue("cashierId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	var cashier model.Cashier
-	err := json.NewDecoder(req.Body).Decode(&cashier)
+	err := json.Unmarshal(req.Request.Body(), &cashier)
 	if err != nil {
 		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
 	response, statusCode := r.handlerService.VerifyLogout(id, cashier.Passcode)
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }

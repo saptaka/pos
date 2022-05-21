@@ -1,39 +1,41 @@
 package api
 
 import (
+	"encoding/json"
 	"net/http"
+
+	"github.com/saptaka/pos/model"
+	"github.com/valyala/fasthttp"
 )
 
 type ReportRouter interface {
-	Revenue(res http.ResponseWriter, req *http.Request)
-	Solds(res http.ResponseWriter, req *http.Request)
+	Revenue(req *fasthttp.RequestCtx)
+	Solds(req *fasthttp.RequestCtx)
 	RouteReportPath()
 }
 
-func (r *router) RouteReportPath() {
-	r.mux.HandleFunc("/revenues", middleware(r.Revenue)).Methods("GET")
-	r.mux.HandleFunc("/solds", middleware(r.Solds)).Methods("GET")
+func (r *apiRouter) RouteReportPath() {
+	r.mux.GET("/revenues", middleware(r.Revenue))
+	r.mux.GET("/solds", middleware(r.Solds))
 }
 
-func (r *router) Revenue(res http.ResponseWriter, req *http.Request) {
+func (r *apiRouter) Revenue(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
 
 	response, statusCode := r.handlerService.Revenue()
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		req.Response.SetStatusCode(statusCode)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }
 
-func (r *router) Solds(res http.ResponseWriter, req *http.Request) {
+func (r *apiRouter) Solds(req *fasthttp.RequestCtx) {
+	req.Response.Header.SetCanonical(model.ContentTypeJSON())
 	response, statusCode := r.handlerService.Solds()
 	if statusCode != http.StatusOK {
-		res.WriteHeader(statusCode)
-		res.Write(response)
+		json.NewEncoder(req).Encode(response)
 		return
 	}
-	res.Header().Set("Content-Type", "application/json")
-	res.Write(response)
+	json.NewEncoder(req).Encode(response)
 }

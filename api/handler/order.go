@@ -14,15 +14,15 @@ import (
 )
 
 type Order interface {
-	ListOrder(limit, skip int) ([]byte, int)
-	DetailOrder(id int64, receiptId string) ([]byte, int)
-	SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int)
-	AddOrder(product model.AddOrderRequest) ([]byte, int)
-	DownloadOrder(id int64) ([]byte, int)
-	CheckOrderDownload(id int64) ([]byte, int)
+	ListOrder(limit, skip int) (map[string]interface{}, int)
+	DetailOrder(id int64, receiptId string) (map[string]interface{}, int)
+	SubTotalOrder(orderRequest []model.OrderedProduct) (map[string]interface{}, int)
+	AddOrder(product model.AddOrderRequest) (map[string]interface{}, int)
+	DownloadOrder(id int64) (map[string]interface{}, int)
+	CheckOrderDownload(id int64) (map[string]interface{}, int)
 }
 
-func (s service) ListOrder(limit, skip int) ([]byte, int) {
+func (s service) ListOrder(limit, skip int) (map[string]interface{}, int) {
 
 	orders, err := s.db.GetOrder(s.ctx, limit, skip)
 	if err == sql.ErrNoRows {
@@ -44,7 +44,7 @@ func (s service) ListOrder(limit, skip int) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, listOrders)
 }
 
-func (s service) DetailOrder(id int64, receiptId string) ([]byte, int) {
+func (s service) DetailOrder(id int64, receiptId string) (map[string]interface{}, int) {
 
 	orderChan := make(chan model.Order)
 	errorOrderChan := make(chan error)
@@ -110,7 +110,7 @@ func (s service) DetailOrder(id int64, receiptId string) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, orderDetails)
 }
 
-func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int) {
+func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) (map[string]interface{}, int) {
 
 	orderedProductDetails, totalPrice, err := s.generateSubOrderedProduct(orderRequest)
 	if err != nil {
@@ -124,7 +124,7 @@ func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int
 	return utils.ResponseWrapper(http.StatusOK, subTotalOrder)
 }
 
-func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
+func (s service) AddOrder(orderRequest model.AddOrderRequest) (map[string]interface{}, int) {
 
 	var totalPrice int
 	subOrderedProductDetails, totalPrice, err := s.generateSubOrderedProduct(orderRequest.OrderedProduct)
@@ -178,7 +178,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, orders)
 }
 
-func (s service) DownloadOrder(id int64) ([]byte, int) {
+func (s service) DownloadOrder(id int64) (map[string]interface{}, int) {
 	receiptPath, err := s.db.DownloadReceipt(s.ctx, id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, receiptPath)
@@ -189,7 +189,7 @@ func (s service) DownloadOrder(id int64) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, receiptPath)
 }
 
-func (s service) CheckOrderDownload(id int64) ([]byte, int) {
+func (s service) CheckOrderDownload(id int64) (map[string]interface{}, int) {
 	isDownloaded, err := s.db.GetDownloadStatus(s.ctx, id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)

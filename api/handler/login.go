@@ -10,12 +10,12 @@ import (
 )
 
 type Login interface {
-	GetPasscode(id int64) ([]byte, int)
-	VerifyLogin(id int64, passcode, token string) ([]byte, int)
-	VerifyLogout(id int64, passcode string) ([]byte, int)
+	GetPasscode(id int64) (map[string]interface{}, int)
+	VerifyLogin(id int64, passcode, token string) (map[string]interface{}, int)
+	VerifyLogout(id int64, passcode string) (map[string]interface{}, int)
 }
 
-func (s service) GetPasscode(id int64) ([]byte, int) {
+func (s service) GetPasscode(id int64) (map[string]interface{}, int) {
 	passcode, err := s.db.GetPasscodeById(s.ctx, id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
@@ -28,7 +28,7 @@ func (s service) GetPasscode(id int64) ([]byte, int) {
 	dataPasscode["passcode"] = passcode
 	return utils.ResponseWrapper(http.StatusOK, dataPasscode)
 }
-func (s service) VerifyLogin(id int64, passcode, token string) ([]byte, int) {
+func (s service) VerifyLogin(id int64, passcode, token string) (map[string]interface{}, int) {
 	cashierPasscode, err := s.db.GetPasscodeById(s.ctx, id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
@@ -44,7 +44,7 @@ func (s service) VerifyLogin(id int64, passcode, token string) ([]byte, int) {
 	tokenData["token"] = token
 	return utils.ResponseWrapper(http.StatusOK, tokenData)
 }
-func (s service) VerifyLogout(id int64, passcode string) ([]byte, int) {
+func (s service) VerifyLogout(id int64, passcode string) (map[string]interface{}, int) {
 	cashierPasscode, err := s.db.GetPasscodeById(s.ctx, id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)

@@ -15,39 +15,51 @@ const (
 	Error   = "Error"
 )
 
-func ResponseWrapper(statusCode int, data interface{}) ([]byte, int) {
-
+func ResponseWrapper(statusCode int, data interface{}) (map[string]interface{}, int) {
+	var response map[string]interface{}
 	if statusCode != http.StatusOK {
 
-		response := model.ErrorResponse{
+		errorResponse := model.ErrorResponse{
 			Response: model.Response{
 				Success: false,
 				Message: "body ValidationError: \"value\" must be an array",
 			},
 			Error: []interface{}{data},
 		}
-		jsonData, err := json.Marshal(response)
+		jsonData, err := json.Marshal(errorResponse)
 		if err != nil {
 			log.Println(err)
 			return nil, http.StatusBadRequest
 		}
-		return jsonData, statusCode
+
+		err = json.Unmarshal(jsonData, &response)
+		if err != nil {
+			log.Println(err)
+			return nil, http.StatusBadRequest
+		}
+		return response, statusCode
 	}
 
-	response := model.SuccessResponse{
+	successResponse := model.SuccessResponse{
 		Response: model.Response{
 			Success: true,
 			Message: Success,
 		},
 		Data: data,
 	}
-	jsonData, err := json.Marshal(response)
+	jsonData, err := json.Marshal(successResponse)
 	if err != nil {
 		log.Println(err)
 		return nil, http.StatusBadRequest
 	}
 
-	return jsonData, statusCode
+	err = json.Unmarshal(jsonData, &response)
+	if err != nil {
+		log.Println(err)
+		return nil, http.StatusBadRequest
+	}
+	return response, statusCode
+
 }
 
 func FormatCommas(num int) string {

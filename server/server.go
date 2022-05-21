@@ -4,15 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
-	"os"
 	"time"
 
-	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
+	"github.com/fasthttp/router"
 	"github.com/saptaka/pos/api"
 	"github.com/saptaka/pos/config"
 	"github.com/saptaka/pos/repository"
+	"github.com/valyala/fasthttp"
 )
 
 type ApiServer interface {
@@ -20,22 +18,20 @@ type ApiServer interface {
 }
 
 type server struct {
-	mux *mux.Router
+	mux *router.Router
 }
 
 func (s *server) Listen(port int) {
 
-	loggingRouter := handlers.LoggingHandler(os.Stdout, s.mux)
+	// loggingRouter := handlers.LoggingHandler(os.Stdout, s.mux)
 	log.Printf("Starting POS server on PORT : %d", port)
-	srv := &http.Server{
-		ReadTimeout:       180 * time.Second,
-		WriteTimeout:      180 * time.Second,
-		ReadHeaderTimeout: 180 * time.Second,
-		Handler:           loggingRouter,
-		Addr:              fmt.Sprintf(":%d", port),
+	srv := &fasthttp.Server{
+		ReadTimeout:  180 * time.Second,
+		WriteTimeout: 180 * time.Second,
+		Handler:      s.mux.Handler,
 	}
 
-	err := srv.ListenAndServe()
+	err := srv.ListenAndServe(fmt.Sprintf(":%d", port))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -43,7 +39,7 @@ func (s *server) Listen(port int) {
 
 func NewServer(cfg *config.Config, repo repository.Repo) ApiServer {
 
-	muxRouter := mux.NewRouter()
+	muxRouter := router.New()
 	apiHandler := api.NewAPI(context.Background(), muxRouter, repo)
 	apiHandler.Route()
 	return &server{muxRouter}

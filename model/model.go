@@ -34,3 +34,11 @@ type ErrorContext struct {
 	Label string      `json:"label"`
 	Value interface{} `json:"value"`
 }
+
+func ContentTypeJSON() ([]byte, []byte) {
+	var (
+		strContentType     = []byte("Content-Type")
+		strApplicationJSON = []byte("application/json")
+	)
+	return strContentType, strApplicationJSON
+}

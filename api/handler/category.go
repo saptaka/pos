@@ -11,14 +11,14 @@ import (
 )
 
 type Category interface {
-	ListCategory(limit, skip int) ([]byte, int)
-	DetailCategory(id int64) ([]byte, int)
-	CreateCategory(Category model.Category) ([]byte, int)
-	UpdateCategory(Category model.Category) ([]byte, int)
-	DeleteCategory(id int64) ([]byte, int)
+	ListCategory(limit, skip int) (map[string]interface{}, int)
+	DetailCategory(id int64) (map[string]interface{}, int)
+	CreateCategory(Category model.Category) (map[string]interface{}, int)
+	UpdateCategory(Category model.Category) (map[string]interface{}, int)
+	DeleteCategory(id int64) (map[string]interface{}, int)
 }
 
-func (s service) ListCategory(limit, skip int) ([]byte, int) {
+func (s service) ListCategory(limit, skip int) (map[string]interface{}, int) {
 	categories, err := s.db.GetCategories(context.Background(), limit, skip)
 
 	if err == sql.ErrNoRows {
@@ -39,7 +39,7 @@ func (s service) ListCategory(limit, skip int) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, listCashier)
 }
 
-func (s service) DetailCategory(id int64) ([]byte, int) {
+func (s service) DetailCategory(id int64) (map[string]interface{}, int) {
 	category, err := s.db.GetCategoryByID(context.Background(), id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
@@ -51,7 +51,7 @@ func (s service) DetailCategory(id int64) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, category)
 }
 
-func (s service) CreateCategory(category model.Category) ([]byte, int) {
+func (s service) CreateCategory(category model.Category) (map[string]interface{}, int) {
 	err := s.validation.Struct(category)
 	if err != nil {
 		log.Println(err)
@@ -65,7 +65,7 @@ func (s service) CreateCategory(category model.Category) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, CategoryData)
 }
 
-func (s service) UpdateCategory(category model.Category) ([]byte, int) {
+func (s service) UpdateCategory(category model.Category) (map[string]interface{}, int) {
 
 	err := s.db.UpdateCategory(s.ctx, category)
 	if err == sql.ErrNoRows {
@@ -78,7 +78,7 @@ func (s service) UpdateCategory(category model.Category) ([]byte, int) {
 	return utils.ResponseWrapper(http.StatusOK, nil)
 }
 
-func (s service) DeleteCategory(id int64) ([]byte, int) {
+func (s service) DeleteCategory(id int64) (map[string]interface{}, int) {
 	err := s.db.DeleteCategory(s.ctx, id)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil)
