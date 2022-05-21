@@ -159,7 +159,6 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 			Discount:         subOderedProductDetail.Discount,
 			TotalFinalPrice:  totalPrice,
 			TotalNormalPrice: totalPrice,
-			DiscountId:       new(int64),
 		}
 		orderedProductDetails = append(orderedProductDetails, orderedProductDetail)
 	}
@@ -284,6 +283,7 @@ func (s service) generateSubOrderedProduct(
 				DiscountId: product.DiscountId,
 				Discount:   discount,
 				Stock:      product.Stock,
+				Image:      product.Image,
 			},
 			Qty:              productItem.Qty,
 			TotalFinalPrice:  finalPrice,
