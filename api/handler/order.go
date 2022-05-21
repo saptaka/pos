@@ -157,8 +157,8 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 			Price:            subOderedProductDetail.Price,
 			Qty:              subOderedProductDetail.Qty,
 			Discount:         subOderedProductDetail.Discount,
-			TotalFinalPrice:  totalPrice,
-			TotalNormalPrice: totalPrice,
+			TotalFinalPrice:  subOderedProductDetail.TotalFinalPrice,
+			TotalNormalPrice: subOderedProductDetail.TotalNormalPrice,
 		}
 		orderedProductDetails = append(orderedProductDetails, orderedProductDetail)
 	}
@@ -217,7 +217,7 @@ func (s service) generateSubOrderedProduct(
 	orderRequest []model.OrderedProduct) ([]model.SubOrderedProductDetail, int, error) {
 	var totalPrice int
 	var orderedProductDetails []model.SubOrderedProductDetail
-	mapOrderedProduct := make(map[int64]*int)
+	mapOrderedProduct := make(map[int64]int)
 	for index, productItem := range orderRequest {
 
 		var product model.Product
@@ -259,12 +259,11 @@ func (s service) generateSubOrderedProduct(
 			finalPrice = normalPrice
 		}
 
-		if mapOrderedProduct[product.ProductId] != nil {
-			orderIndex := mapOrderedProduct[product.ProductId]
-			orderedProductDetails[*orderIndex].Qty += productItem.Qty
-			orderedProductDetails[*orderIndex].TotalFinalPrice += finalPrice
-			orderedProductDetails[*orderIndex].TotalNormalPrice += normalPrice
-			orderedProductDetails[*orderIndex].Stock = product.Stock
+		if orderIndex, ok := mapOrderedProduct[product.ProductId]; ok {
+			orderedProductDetails[orderIndex].Qty += productItem.Qty
+			orderedProductDetails[orderIndex].TotalFinalPrice += finalPrice
+			orderedProductDetails[orderIndex].TotalNormalPrice += normalPrice
+			orderedProductDetails[orderIndex].Stock = product.Stock
 			totalPrice += finalPrice
 			continue
 		}
@@ -289,8 +288,7 @@ func (s service) generateSubOrderedProduct(
 			TotalNormalPrice: normalPrice,
 		}
 		orderedProductDetails = append(orderedProductDetails, orderedProductDetail)
-		orderIndex := index
-		mapOrderedProduct[product.ProductId] = &orderIndex
+		mapOrderedProduct[product.ProductId] = index
 	}
 
 	return orderedProductDetails, totalPrice, nil
