@@ -23,7 +23,7 @@ type Product struct {
 	DiscountId *int64     `json:"-"`
 	CategoryId *int64     `json:"-"`
 	Discount   *Discount  `json:"discount"`
-	Category   *Category  `json:"category"`
+	Category   *Category  `json:"category,omitempty"`
 }
 
 type ProductCreateResponse struct {

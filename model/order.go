@@ -14,15 +14,15 @@ type ListOrders struct {
 
 type Order struct {
 	OrderId           int64      `json:"orderId"`
-	PaymentID         *int64     `json:"paymentTypesId"`
 	CashierID         *int64     `json:"cashiersId,omitempty"`
-	TotalPaid         int        `json:"totalPaid"`
+	PaymentID         *int64     `json:"paymentTypesId"`
 	TotalPrice        int        `json:"totalPrice"`
+	TotalPaid         int        `json:"totalPaid"`
 	TotalReturn       int        `json:"totalReturn"`
 	ReceiptID         string     `json:"receiptId"`
 	ReceiptIDFilePath string     `json:"-"`
-	CreatedAt         *time.Time `json:"createdAt"`
 	UpdatedAt         *time.Time `json:"updatedAt"`
+	CreatedAt         *time.Time `json:"createdAt"`
 	Cashier           *Cashier   `json:"cashier,omitempty"`
 	PaymentType       *Payment   `json:"payment_type,omitempty"`
 }
@@ -31,12 +31,18 @@ type OrderedProductDetail struct {
 	ProductId        int64     `json:"productId"`
 	Name             string    `json:"name" validate:"required"`
 	Price            int       `json:"price" validate:"required"`
+	Discount         *Discount `json:"discount"`
 	Qty              int       `json:"qty" validate:"required"`
-	Stock            int       `json:"stock"`
 	TotalFinalPrice  int       `json:"totalFinalPrice"`
 	TotalNormalPrice int       `json:"totalNormalPrice"`
 	DiscountId       *int64    `json:"-"`
-	Discount         *Discount `json:"discount"`
+}
+
+type SubOrderedProductDetail struct {
+	Product
+	Qty              int `json:"qty" validate:"required"`
+	TotalFinalPrice  int `json:"totalFinalPrice"`
+	TotalNormalPrice int `json:"totalNormalPrice"`
 }
 
 type AddOrderRequest struct {
@@ -51,6 +57,6 @@ type OrderedProduct struct {
 }
 
 type SubTotalOrder struct {
-	Subtotal       int                    `json:"subtotal"`
-	OrderedProduct []OrderedProductDetail `json:"products"`
+	Subtotal       int                       `json:"subtotal"`
+	OrderedProduct []SubOrderedProductDetail `json:"products"`
 }

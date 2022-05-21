@@ -112,7 +112,7 @@ func (s service) DetailOrder(id int64, receiptId string) ([]byte, int) {
 
 func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int) {
 
-	orderedProductDetails, totalPrice, err := s.generateOrderedProduct(orderRequest)
+	orderedProductDetails, totalPrice, err := s.generateSubOrderedProduct(orderRequest)
 	if err != nil {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
@@ -127,8 +127,7 @@ func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) ([]byte, int
 func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 
 	var totalPrice int
-	var orderedProductDetails []model.OrderedProductDetail
-	orderedProductDetails, totalPrice, err := s.generateOrderedProduct(orderRequest.OrderedProduct)
+	subOrderedProductDetails, totalPrice, err := s.generateSubOrderedProduct(orderRequest.OrderedProduct)
 	if err != nil {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
@@ -149,6 +148,20 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 	if err != nil {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+	}
+	var orderedProductDetails []model.OrderedProductDetail
+	for _, subOderedProductDetail := range subOrderedProductDetails {
+		orderedProductDetail := model.OrderedProductDetail{
+			ProductId:        subOderedProductDetail.ProductId,
+			Name:             subOderedProductDetail.Name,
+			Price:            subOderedProductDetail.Price,
+			Qty:              subOderedProductDetail.Qty,
+			Discount:         &model.Discount{},
+			TotalFinalPrice:  totalPrice,
+			TotalNormalPrice: totalPrice,
+			DiscountId:       new(int64),
+		}
+		orderedProductDetails = append(orderedProductDetails, orderedProductDetail)
 	}
 
 	orders := model.OrderDetails{
@@ -201,10 +214,10 @@ func (s service) calculatePrice(discount model.Discount, price, qty int) int {
 	return finalPrice
 }
 
-func (s service) generateOrderedProduct(
-	orderRequest []model.OrderedProduct) ([]model.OrderedProductDetail, int, error) {
+func (s service) generateSubOrderedProduct(
+	orderRequest []model.OrderedProduct) ([]model.SubOrderedProductDetail, int, error) {
 	var totalPrice int
-	var orderedProductDetails []model.OrderedProductDetail
+	var orderedProductDetails []model.SubOrderedProductDetail
 	mapOrderedProduct := make(map[int64]*int)
 	for index, productItem := range orderRequest {
 
@@ -263,16 +276,18 @@ func (s service) generateOrderedProduct(
 		}
 
 		totalPrice += finalPrice
-		orderedProductDetail := model.OrderedProductDetail{
-			ProductId:        product.ProductId,
-			Name:             product.Name,
-			Price:            totalPrice,
+		orderedProductDetail := model.SubOrderedProductDetail{
+			Product: model.Product{
+				ProductId:  product.ProductId,
+				Name:       product.Name,
+				Price:      totalPrice,
+				DiscountId: product.DiscountId,
+				Discount:   discount,
+				Stock:      product.Stock,
+			},
 			Qty:              productItem.Qty,
 			TotalFinalPrice:  finalPrice,
 			TotalNormalPrice: normalPrice,
-			DiscountId:       product.DiscountId,
-			Discount:         discount,
-			Stock:            product.Stock,
 		}
 		orderedProductDetails = append(orderedProductDetails, orderedProductDetail)
 		orderIndex := index
