@@ -21,7 +21,7 @@ type Product struct {
 	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
 	CreatedAt  *time.Time `json:"createdAt,omitempty"`
 	DiscountId *int64     `json:"-"`
-	CategoryId *int64     `json:"categoryId"`
+	CategoryId *int64     `json:"categoryId,omitempty"`
 	Discount   *Discount  `json:"discount"`
 	Category   *Category  `json:"category,omitempty"`
 }

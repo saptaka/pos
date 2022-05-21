@@ -77,6 +77,7 @@ func (s service) CreateProduct(productRequest model.ProductCreateRequest) ([]byt
 	productCache.Set(product.ProductId, product)
 
 	productCreatedResponse := model.ProductCreateResponse{
+		Name:       product.Name,
 		ProductId:  product.ProductId,
 		Stock:      product.Stock,
 		SKU:        product.SKU,

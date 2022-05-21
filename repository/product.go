@@ -398,15 +398,21 @@ func (r repo) GetProductsByIds(ctx context.Context, ids []int64) ([]model.Produc
 
 func (r repo) CreateDiscount(ctx context.Context, discount model.Discount) (int64, error) {
 
+	var unixExpiredAt int64
+	if discount.ExpiratedAt != nil {
+		unixExpiredAt = int64(discount.ExpiratedAt.(float64))
+	}
+
+	expiredAt := time.Unix(unixExpiredAt, 0)
+	expiredAtFormat := expiredAt.Format("02 Jan 2006")
 	query := `INSERT INTO 
 	discounts (
 		qty,
 		types,
 		result, 
 		expired_at,
-		expired_at_format, 
-		string_format) 
-	VALUES (?,?,?,FROM_UNIXTIME(?),FROM_UNIXTIME(?, '%d %M %Y'),?);`
+		expired_at_format) 
+	VALUES (?,?,?,?,?);`
 
 	stmt, err := r.db.PrepareContext(ctx, query)
 	if err != nil {
@@ -417,9 +423,8 @@ func (r repo) CreateDiscount(ctx context.Context, discount model.Discount) (int6
 		discount.Qty,
 		discount.Type,
 		discount.Result,
-		discount.ExpiratedAt,
-		discount.ExpiratedAt,
-		discount.StringFormat,
+		expiredAt,
+		expiredAtFormat,
 	)
 	if err != nil {
 		return 0, err
