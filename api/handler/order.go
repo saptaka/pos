@@ -265,7 +265,7 @@ func (s service) generateSubOrderedProduct(
 			orderedProductDetails[*orderIndex].Qty += productItem.Qty
 			orderedProductDetails[*orderIndex].TotalFinalPrice += finalPrice
 			orderedProductDetails[*orderIndex].TotalNormalPrice += normalPrice
-			orderedProductDetails[index].Stock = product.Stock
+			orderedProductDetails[*orderIndex].Stock = product.Stock
 			totalPrice += finalPrice
 			continue
 		}
