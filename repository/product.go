@@ -199,14 +199,14 @@ func (r repo) GetProducts(ctx context.Context,
 
 	products := <-productChan
 	categories := <-categoryChan
-	categoriesMap := make(map[int64]*model.Category)
+	categoriesMap := make(map[int64]model.Category)
 	for _, category := range categories {
-		categoriesMap[category.CategoryId] = &category
-		categories = categories[1:]
+		categoriesMap[category.CategoryId] = category
 	}
 	for index, product := range products {
 		if product.CategoryId != nil {
-			products[index].Category = categoriesMap[*product.CategoryId]
+			category := categoriesMap[*product.CategoryId]
+			products[index].Category = &category
 		}
 	}
 
