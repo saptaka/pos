@@ -20,3 +20,5 @@ type Meta struct {
 	Limit int `json:"limit"`
 	Skip  int `json:"skip"`
 }
+
+const RFC3339MilliZ = "2006-01-02T15:04:05.000Z07:00"
