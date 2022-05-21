@@ -35,8 +35,18 @@ func (r *router) ListProduct(res http.ResponseWriter, req *http.Request) {
 	categoryIdParams := req.URL.Query().Get("categoryId")
 	limit, _ := strconv.Atoi(limitQuery)
 	skip, _ := strconv.Atoi(skipQuery)
-	categoryId, _ := strconv.ParseInt(categoryIdParams, 10, 0)
-	response, statusCode := r.handlerService.ListProduct(limit, skip, categoryId, query)
+	categoryId, err := strconv.ParseInt(categoryIdParams, 10, 0)
+	var product model.Product
+	if err == nil {
+		product = model.Product{
+			CategoryId: &categoryId,
+		}
+	}
+
+	if query != "" {
+		product.Name = query
+	}
+	response, statusCode := r.handlerService.ListProduct(limit, skip, product)
 	if statusCode != http.StatusOK {
 		res.WriteHeader(statusCode)
 		res.Write(response)

@@ -13,7 +13,7 @@ import (
 
 type ProductRepo interface {
 	GetProductByID(ctx context.Context, id int64) (model.Product, error)
-	GetProducts(ctx context.Context, limit, skip int, categoryID int64, query string) ([]model.Product, error)
+	GetProducts(ctx context.Context, limit, skip int, product model.Product) ([]model.Product, error)
 	UpdateProduct(ctx context.Context, product model.Product) error
 	CreateProduct(ctx context.Context, product model.ProductCreateRequest) (model.Product, error)
 	DeleteProduct(ctx context.Context, id int64) error
@@ -92,7 +92,7 @@ func (r repo) GetProductByID(ctx context.Context, id int64) (model.Product, erro
 }
 
 func (r repo) GetProducts(ctx context.Context,
-	limit, skip int, categoryID int64, query string) ([]model.Product, error) {
+	limit, skip int, product model.Product) ([]model.Product, error) {
 
 	productChan := make(chan []model.Product)
 	go func(productChanData chan []model.Product) {
@@ -110,15 +110,12 @@ func (r repo) GetProducts(ctx context.Context,
 			`
 		var withQuery string
 		values := make([]interface{}, 0)
-		if query != "" && categoryID != 0 {
-			withQuery = " WHERE name LIKE CONCAT('%',?,'%') AND category_id=?"
-			values = append(values, query, categoryID)
-		} else if query != "" {
+		if product.Name != "" {
 			withQuery = " WHERE name LIKE CONCAT('%',?,'%')"
-			values = append(values, query)
-		} else if categoryID != 0 {
+			values = append(values, product.Name)
+		} else if product.CategoryId != nil {
 			withQuery = " WHERE category_id=?"
-			values = append(values, categoryID)
+			values = append(values, *product.CategoryId)
 		}
 		querySelect = fmt.Sprintf(querySelect, withQuery)
 
@@ -211,6 +208,10 @@ func (r repo) GetProducts(ctx context.Context,
 		if product.CategoryId != nil {
 			products[index].Category = categoriesMap[*product.CategoryId]
 		}
+	}
+
+	if products == nil {
+		products = make([]model.Product, 0)
 	}
 
 	return products, nil

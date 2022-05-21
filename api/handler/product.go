@@ -29,15 +29,16 @@ func (c *syncMap) Set(key int64, value model.Product) {
 }
 
 type Product interface {
-	ListProduct(limit, skip int, categoryID int64, query string) ([]byte, int)
+	ListProduct(limit, skip int, product model.Product) ([]byte, int)
 	DetailProduct(id int64) ([]byte, int)
 	CreateProduct(product model.ProductCreateRequest) ([]byte, int)
 	UpdateProduct(product model.Product) ([]byte, int)
 	DeleteProduct(id int64) ([]byte, int)
 }
 
-func (s service) ListProduct(limit, skip int, categoryID int64, query string) ([]byte, int) {
-	products, err := s.db.GetProducts(s.ctx, limit, skip, categoryID, query)
+func (s service) ListProduct(limit, skip int, product model.Product) ([]byte, int) {
+	products, err := s.db.GetProducts(s.ctx, limit, skip, product)
+
 	listProduct := model.ListProduct{
 		Products: products,
 		Meta: model.Meta{
@@ -117,7 +118,7 @@ func (s service) DeleteProduct(id int64) ([]byte, int) {
 }
 
 func (s service) LoadProduct() error {
-	products, err := s.db.GetProducts(s.ctx, 0, 0, 0, "")
+	products, err := s.db.GetProducts(s.ctx, 0, 0, model.Product{})
 	for _, product := range products {
 		productCache.Set(product.ProductId, product)
 	}
