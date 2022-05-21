@@ -117,6 +117,9 @@ func (r repo) GetOrder(ctx context.Context, limit, skip int) ([]model.Order, err
 		if order.CashierID != nil {
 			cashier := mapCashier[*order.CashierID]
 			orders[index].Cashier = &cashier
+		} else {
+			cashierId := int64(0)
+			orders[index].CashierID = &cashierId
 		}
 		if order.PaymentID != nil {
 			payment := mapPayment[*order.PaymentID]
@@ -174,6 +177,8 @@ func (r repo) GetOrderByID(ctx context.Context, id int64) (model.Order, error) {
 
 		}(*order.CashierID, cashierChan)
 	} else {
+		cashierId := int64(0)
+		order.CashierID = &cashierId
 		close(cashierChan)
 	}
 
@@ -245,6 +250,8 @@ func (r repo) GetOrderByReceiptID(ctx context.Context, receiptId string) (model.
 
 		}(*order.CashierID, cashierChan)
 	} else {
+		cashierId := int64(0)
+		order.CashierID = &cashierId
 		close(cashierChan)
 	}
 
@@ -294,6 +301,10 @@ func (r repo) CreateOrder(ctx context.Context, orderRequest model.Order) (model.
 		return orderRequest, err
 	}
 	orderRequest.OrderId = id
+	if orderRequest.CashierID == nil {
+		cashierId := int64(0)
+		orderRequest.CashierID = &cashierId
+	}
 
 	return orderRequest, nil
 }

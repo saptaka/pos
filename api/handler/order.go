@@ -133,6 +133,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
+
 	now := time.Now()
 	order := model.Order{
 		PaymentID:   &orderRequest.PaymentID,
@@ -251,6 +252,7 @@ func (s service) generateOrderedProduct(
 			orderedProductDetails[*orderIndex].Qty += productItem.Qty
 			orderedProductDetails[*orderIndex].TotalFinalPrice += finalPrice
 			orderedProductDetails[*orderIndex].TotalNormalPrice += normalPrice
+			orderedProductDetails[index].Stock = product.Stock
 			totalPrice += finalPrice
 			continue
 		}
@@ -270,6 +272,7 @@ func (s service) generateOrderedProduct(
 			TotalNormalPrice: normalPrice,
 			DiscountId:       product.DiscountId,
 			Discount:         discount,
+			Stock:            product.Stock,
 		}
 		orderedProductDetails = append(orderedProductDetails, orderedProductDetail)
 		orderIndex := index

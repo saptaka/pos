@@ -15,7 +15,7 @@ type ListOrders struct {
 type Order struct {
 	OrderId           int64      `json:"orderId"`
 	PaymentID         *int64     `json:"paymentTypesId"`
-	CashierID         *int64     `json:"cashierId,omitempty"`
+	CashierID         *int64     `json:"cashiersId,omitempty"`
 	TotalPaid         int        `json:"totalPaid"`
 	TotalPrice        int        `json:"totalPrice"`
 	TotalReturn       int        `json:"totalReturn"`
@@ -32,6 +32,7 @@ type OrderedProductDetail struct {
 	Name             string    `json:"name" validate:"required"`
 	Price            int       `json:"price" validate:"required"`
 	Qty              int       `json:"qty" validate:"required"`
+	Stock            int       `json:"stock"`
 	TotalFinalPrice  int       `json:"totalFinalPrice"`
 	TotalNormalPrice int       `json:"totalNormalPrice"`
 	DiscountId       *int64    `json:"-"`
