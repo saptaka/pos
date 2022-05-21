@@ -39,7 +39,8 @@ func (r repo) GetOrder(ctx context.Context, limit, skip int) ([]model.Order, err
 			total_paid,
 			total_return,
 			receipt_id,
-			created_at
+			created_at,
+			updated_at 
 			FROM 
 			orders `
 		if limit != 0 {
@@ -68,6 +69,7 @@ func (r repo) GetOrder(ctx context.Context, limit, skip int) ([]model.Order, err
 				&order.TotalReturn,
 				&order.ReceiptID,
 				&order.CreatedAt,
+				&order.UpdatedAt,
 			)
 			if err != nil {
 				orderChanData <- make([]model.Order, 0)

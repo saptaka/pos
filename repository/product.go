@@ -48,6 +48,30 @@ func (r repo) GetProductByID(ctx context.Context, id int64) (model.Product, erro
 	if err != nil {
 		return product, err
 	}
+
+	var discountById *model.Discount
+	if product.DiscountId != nil {
+		discount, err := r.GetDiscountByID(ctx, *product.DiscountId)
+		if err != sql.ErrNoRows && err != nil {
+			log.Println("error get product ", err)
+			return product, err
+		}
+
+		if discount.Type == model.BuyN {
+			discount.StringFormat = fmt.Sprintf("Buy %d only Rp. %s",
+				discount.Qty, fmt.Sprintf("%d", discount.Result))
+		} else {
+			discountResult := fmt.Sprint(discount.Result, "%")
+			discountPrice := product.Price - (product.Price * discount.Result / 100)
+			discount.StringFormat = fmt.Sprintf("Discount %s Rp. %s",
+				discountResult, fmt.Sprintf("%d", discountPrice))
+		}
+
+		discountById = &discount
+	}
+
+	product.Discount = discountById
+
 	if product.CategoryId != nil {
 		category, err = r.GetCategoryByID(ctx, *product.CategoryId)
 		if err != nil {
@@ -145,6 +169,17 @@ func (r repo) GetProducts(ctx context.Context,
 					log.Println("error get product ", err)
 					return
 				}
+
+				if discount.Type == model.BuyN {
+					discount.StringFormat = fmt.Sprintf("Buy %d only Rp. %s",
+						discount.Qty, fmt.Sprintf("%d", discount.Result))
+				} else {
+					discountResult := fmt.Sprint(discount.Result, "%")
+					discountPrice := product.Price - (product.Price * discount.Result / 100)
+					discount.StringFormat = fmt.Sprintf("Discount %s Rp. %s",
+						discountResult, fmt.Sprintf("%d", discountPrice))
+				}
+
 				product.Discount = &discount
 			}
 

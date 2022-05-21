@@ -57,3 +57,6 @@ var DiscountType = map[string]bool{
 	"PERCENT": true,
 	"BUY_N":   true,
 }
+
+const Percent = "PERCENT"
+const BuyN = "BUY_N"

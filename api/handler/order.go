@@ -156,7 +156,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 			Name:             subOderedProductDetail.Name,
 			Price:            subOderedProductDetail.Price,
 			Qty:              subOderedProductDetail.Qty,
-			Discount:         &model.Discount{},
+			Discount:         subOderedProductDetail.Discount,
 			TotalFinalPrice:  totalPrice,
 			TotalNormalPrice: totalPrice,
 			DiscountId:       new(int64),
