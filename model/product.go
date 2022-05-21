@@ -20,7 +20,7 @@ type Product struct {
 	SKU        string     `json:"sku,omitempty"`
 	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
 	CreatedAt  *time.Time `json:"createdAt,omitempty"`
-	DiscountId *int64     `json:"-"`
+	DiscountId *int64     `json:"discountId,omitempty"`
 	CategoryId *int64     `json:"categoryId,omitempty"`
 	Discount   *Discount  `json:"discount"`
 	Category   *Category  `json:"category,omitempty"`
