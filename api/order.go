@@ -90,7 +90,7 @@ func (r *router) SubTotalOrder(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	if len(orderedProducts) == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest,
+		response, _ := utils.ResponseWrapper(http.StatusBadRequest,
 			model.ErrorData{
 				Message: "\"value\" must be an array",
 				Path:    []string{},
@@ -100,7 +100,6 @@ func (r *router) SubTotalOrder(res http.ResponseWriter, req *http.Request) {
 					Value: make(map[string]interface{}),
 				},
 			})
-		res.WriteHeader(statusCode)
 		res.Write(response)
 		return
 	}
