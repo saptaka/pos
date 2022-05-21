@@ -1,6 +1,8 @@
 package api
 
 import (
+	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strings"
@@ -12,6 +14,17 @@ const Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NDkzMTU5NzksInN1
 
 func middleware(next func(res http.ResponseWriter, req *http.Request)) func(res http.ResponseWriter, req *http.Request) {
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
+
+		go func(r io.ReadCloser) {
+			if r != nil {
+				bodyBytes, err := ioutil.ReadAll(r)
+				if err != nil {
+					log.Println(err)
+				}
+				bodyString := string(bodyBytes)
+				log.Println(bodyString)
+			}
+		}(req.Body)
 
 		reqToken := req.Header.Get("Authorization")
 		splitToken := strings.Split(reqToken, "JWT ")
