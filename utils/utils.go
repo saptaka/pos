@@ -22,6 +22,7 @@ func ResponseWrapper(statusCode int, data interface{}) ([]byte, int) {
 				Success: false,
 				Message: Error,
 			},
+			Error: make([]interface{}, 0),
 		}
 		jsonData, err := json.Marshal(response)
 		if err != nil {
