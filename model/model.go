@@ -22,3 +22,15 @@ type Meta struct {
 }
 
 const RFC3339MilliZ = "2006-01-02T15:04:05.000Z07:00"
+
+type ErrorData struct {
+	Message string       `json:"message"`
+	Path    []string     `json:"path"`
+	Type    string       `json:"type"`
+	Context ErrorContext `json:"context"`
+}
+
+type ErrorContext struct {
+	Label string      `json:"label"`
+	Value interface{} `json:"value"`
+}

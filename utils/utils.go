@@ -22,9 +22,9 @@ func ResponseWrapper(statusCode int, data interface{}) ([]byte, int) {
 		response := model.ErrorResponse{
 			Response: model.Response{
 				Success: false,
-				Message: Error,
+				Message: "body ValidationError: \"value\" must be an array",
 			},
-			Error: make([]interface{}, 0),
+			Error: []interface{}{data},
 		}
 		jsonData, err := json.Marshal(response)
 		if err != nil {
