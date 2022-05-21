@@ -238,7 +238,7 @@ func (r repo) CreateProduct(ctx context.Context, product model.ProductCreateRequ
 		return productDetail, err
 	}
 
-	now := time.Now()
+	now, _ := time.Parse(time.RFC3339, time.Now().UTC().Format(time.RFC3339))
 
 	result, err := stmt.Exec(
 		product.Name,

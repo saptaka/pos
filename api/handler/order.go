@@ -134,7 +134,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) ([]byte, int) {
 		return utils.ResponseWrapper(http.StatusBadRequest, nil)
 	}
 
-	now := time.Now()
+	now, _ := time.Parse(time.RFC3339, time.Now().UTC().Format(time.RFC3339))
 	order := model.Order{
 		PaymentID:   &orderRequest.PaymentID,
 		TotalPaid:   orderRequest.TotalPaid,

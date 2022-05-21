@@ -20,5 +20,3 @@ type Meta struct {
 	Limit int `json:"limit"`
 	Skip  int `json:"skip"`
 }
-
-type UserContext string
