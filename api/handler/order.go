@@ -279,7 +279,7 @@ func (s service) generateSubOrderedProduct(
 			Product: model.Product{
 				ProductId: product.ProductId,
 				Name:      product.Name,
-				Price:     totalPrice,
+				Price:     product.Price,
 				Discount:  discount,
 				Stock:     product.Stock,
 				Image:     product.Image,
