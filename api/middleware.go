@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
 	"github.com/valyala/fasthttp"
 )
@@ -14,6 +15,7 @@ const Token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE2NDkzMTU5NzksInN1
 
 func middleware(next func(req *fasthttp.RequestCtx)) func(req *fasthttp.RequestCtx) {
 	return (func(req *fasthttp.RequestCtx) {
+		req.Response.Header.SetCanonical(model.ContentTypeJSON())
 		token := req.Request.Header.Peek("Authorization")
 		reqToken := string(token)
 		splitToken := strings.Split(reqToken, "JWT ")
