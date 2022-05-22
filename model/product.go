@@ -3,9 +3,9 @@ package model
 import "time"
 
 type ProductCreateRequest struct {
-	Name       string    `json:"name" validate:"required"`
-	Stock      int       `json:"stock,omitempty" validate:"required"`
-	Price      int       `json:"price" validate:"required"`
+	Name       string    `json:"name" `
+	Stock      int       `json:"stock,omitempty" `
+	Price      int       `json:"price" `
 	Image      string    `json:"image,omitempty"`
 	CategoryId *int64    `json:"categoryId"`
 	Discount   *Discount `json:"discount"`
@@ -13,9 +13,9 @@ type ProductCreateRequest struct {
 
 type Product struct {
 	ProductId  int64      `json:"productId"`
-	Name       string     `json:"name" validate:"required"`
-	Stock      int        `json:"stock,omitempty" validate:"required"`
-	Price      int        `json:"price" validate:"required"`
+	Name       string     `json:"name" `
+	Stock      int        `json:"stock,omitempty" `
+	Price      int        `json:"price" `
 	Image      string     `json:"image,omitempty"`
 	SKU        string     `json:"sku,omitempty"`
 	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
@@ -28,9 +28,9 @@ type Product struct {
 
 type ProductCreateResponse struct {
 	ProductId  int64      `json:"productId"`
-	Name       string     `json:"name" validate:"required"`
-	Stock      int        `json:"stock,omitempty" validate:"required"`
-	Price      int        `json:"price" validate:"required"`
+	Name       string     `json:"name" `
+	Stock      int        `json:"stock,omitempty" `
+	Price      int        `json:"price" `
 	Image      string     `json:"image,omitempty"`
 	SKU        string     `json:"sku,omitempty"`
 	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
@@ -40,8 +40,8 @@ type ProductCreateResponse struct {
 
 type Discount struct {
 	DiscountID      int64       `json:"discountId,omitempty"`
-	Qty             int         `json:"qty" validate:"required"`
-	Type            string      `json:"type" validate:"required"`
+	Qty             int         `json:"qty" `
+	Type            string      `json:"type" `
 	Result          int         `json:"result"`
 	ExpiratedAt     interface{} `json:"expiredAt,omitempty"`
 	ExpiredAtFormat string      `json:"expiratedAtFormat"`

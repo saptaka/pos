@@ -12,7 +12,7 @@ type SuccessResponse struct {
 
 type ErrorResponse struct {
 	Response
-	Error []interface{} `json:"error"`
+	Error interface{} `json:"error"`
 }
 
 type Meta struct {
@@ -36,8 +36,8 @@ type CreateErrorContext struct {
 }
 
 type CustomErrorContext struct {
-	Peers           []string    `json:"Peers"`
-	PeersWithLabels []string    `json:"peersWithLabels"`
+	Peers           []string    `json:"peers,omitempty"`
+	PeersWithLabels []string    `json:"peersWithLabels,omitempty"`
 	Label           string      `json:"label"`
 	Value           interface{} `json:"value"`
 }
@@ -51,6 +51,7 @@ func ContentTypeJSON() ([]byte, []byte) {
 }
 
 const (
-	CREATE = "CREATE"
-	UPDATE = "UPDATE"
+	CREATE   = "CREATE"
+	UPDATE   = "UPDATE"
+	SUBORDER = "SUBORDER"
 )

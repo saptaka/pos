@@ -11,12 +11,13 @@ import (
 
 	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
+	"github.com/valyala/fasthttp"
 )
 
 type Order interface {
 	ListOrder(limit, skip int) (map[string]interface{}, int)
 	DetailOrder(id int64, receiptId string) (map[string]interface{}, int)
-	SubTotalOrder(orderRequest []model.OrderedProduct) (map[string]interface{}, int)
+	SubTotalOrder(orderRequest model.OrderedProducts) (map[string]interface{}, int)
 	AddOrder(product model.AddOrderRequest) (map[string]interface{}, int)
 	DownloadOrder(id int64) (map[string]interface{}, int)
 	CheckOrderDownload(id int64) (map[string]interface{}, int)
@@ -110,9 +111,13 @@ func (s service) DetailOrder(id int64, receiptId string) (map[string]interface{}
 	return utils.ResponseWrapper(http.StatusOK, orderDetails, nil)
 }
 
-func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) (map[string]interface{}, int) {
-
-	orderedProductDetails, totalPrice, err := s.generateSubOrderedProduct(orderRequest)
+func (s service) SubTotalOrder(orderRequest model.OrderedProducts) (map[string]interface{}, int) {
+	validation := orderValidation(model.SUBORDER)
+	err := validation.Struct(orderRequest)
+	if err != nil {
+		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.SUBORDER)
+	}
+	orderedProductDetails, totalPrice, err := s.generateSubOrderedProduct(orderRequest.Products)
 	if err != nil {
 		log.Println(err)
 		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
@@ -125,7 +130,11 @@ func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) (map[string]
 }
 
 func (s service) AddOrder(orderRequest model.AddOrderRequest) (map[string]interface{}, int) {
-
+	validation := orderValidation(model.CREATE)
+	err := validation.Struct(orderRequest)
+	if err != nil {
+		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.CREATE)
+	}
 	var totalPrice int
 	subOrderedProductDetails, totalPrice, err := s.generateSubOrderedProduct(orderRequest.OrderedProduct)
 	if err != nil {

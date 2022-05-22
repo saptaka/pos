@@ -14,7 +14,7 @@ type Report interface {
 func (s service) Revenue() (map[string]interface{}, int) {
 	revenue, err := s.db.GetRevenues(s.ctx)
 	if err != nil {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, "", nil)
 	}
 	return utils.ResponseWrapper(http.StatusOK, revenue, nil)
 }

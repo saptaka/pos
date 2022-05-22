@@ -89,7 +89,7 @@ func (r *apiRouter) UpdateCashier(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("cashierId").(string)
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, "", nil)
 		req.Response.Header.SetCanonical(model.ContentTypeJSON())
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
@@ -99,7 +99,7 @@ func (r *apiRouter) UpdateCashier(req *fasthttp.RequestCtx) {
 	var cashierDetail model.Cashier
 	err := json.Unmarshal(req.Request.Body(), &cashierDetail)
 	if err != nil {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, "", nil)
 		req.Response.Header.SetCanonical(model.ContentTypeJSON())
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
@@ -121,7 +121,7 @@ func (r *apiRouter) DeleteCashier(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("cashierId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, "", nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return

@@ -29,10 +29,10 @@ type Order struct {
 
 type OrderedProductDetail struct {
 	ProductId        int64     `json:"productId"`
-	Name             string    `json:"name" validate:"required"`
-	Price            int       `json:"price" validate:"required"`
+	Name             string    `json:"name" `
+	Price            int       `json:"price" `
 	Discount         *Discount `json:"discount"`
-	Qty              int       `json:"qty" validate:"required"`
+	Qty              int       `json:"qty" `
 	TotalNormalPrice int       `json:"totalNormalPrice"`
 	TotalFinalPrice  int       `json:"totalFinalPrice"`
 	DiscountId       *int64    `json:"-"`
@@ -40,20 +40,24 @@ type OrderedProductDetail struct {
 
 type SubOrderedProductDetail struct {
 	Product
-	Qty              int `json:"qty" validate:"required"`
+	Qty              int `json:"qty" `
 	TotalNormalPrice int `json:"totalNormalPrice"`
 	TotalFinalPrice  int `json:"totalFinalPrice"`
 }
 
 type AddOrderRequest struct {
-	PaymentID      int64            `json:"paymentId" validate:"required"`
-	TotalPaid      int              `json:"totalPaid" validate:"required"`
+	PaymentID      int64            `json:"paymentId" `
+	TotalPaid      int              `json:"totalPaid" `
 	OrderedProduct []OrderedProduct `json:"products"`
 }
 
 type OrderedProduct struct {
-	ProductId int64 `json:"productId" validate:"required"`
-	Qty       int   `json:"qty" validate:"required"`
+	ProductId int64 `json:"productId" `
+	Qty       int   `json:"qty" `
+}
+
+type OrderedProducts struct {
+	Products []OrderedProduct
 }
 
 type SubTotalOrder struct {

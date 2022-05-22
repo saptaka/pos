@@ -8,6 +8,7 @@ import (
 
 	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
+	"github.com/valyala/fasthttp"
 )
 
 type Payment interface {
@@ -49,13 +50,10 @@ func (s service) DetailPayment(id int64) (map[string]interface{}, int) {
 }
 
 func (s service) CreatePayment(payment model.Payment) (map[string]interface{}, int) {
-	err := s.validation.Struct(payment)
+	validation := paymentValidation(model.CREATE)
+	err := validation.Struct(payment)
 	if err != nil {
-		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
-	}
-	if !model.PaymentType[payment.Type] {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
+		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.CREATE)
 	}
 
 	paymentData, err := s.db.CreatePayment(s.ctx, payment)
@@ -67,9 +65,15 @@ func (s service) CreatePayment(payment model.Payment) (map[string]interface{}, i
 }
 
 func (s service) UpdatePayment(payment model.Payment) (map[string]interface{}, int) {
-	err := s.db.UpdatePayment(s.ctx, payment)
+	validation := paymentValidation(model.UPDATE)
+	err := validation.Struct(payment)
+	if err != nil {
+		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.UPDATE)
+	}
+
+	err = s.db.UpdatePayment(s.ctx, payment)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, "Payment Not Found", nil)
 	}
 	if err != nil {
 		log.Println(err)

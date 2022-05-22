@@ -9,6 +9,7 @@ import (
 
 	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
+	"github.com/valyala/fasthttp"
 )
 
 type syncMap struct {
@@ -67,7 +68,11 @@ func (s service) DetailProduct(id int64) (map[string]interface{}, int) {
 }
 
 func (s service) CreateProduct(productRequest model.ProductCreateRequest) (map[string]interface{}, int) {
-
+	validation := productValidation(model.CREATE)
+	err := validation.Struct(productRequest)
+	if err != nil {
+		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.CREATE)
+	}
 	product, err := s.db.CreateProduct(s.ctx, productRequest)
 	if err != nil {
 		log.Println(err)
@@ -92,7 +97,12 @@ func (s service) CreateProduct(productRequest model.ProductCreateRequest) (map[s
 }
 
 func (s service) UpdateProduct(product model.Product) (map[string]interface{}, int) {
-	err := s.db.UpdateProduct(s.ctx, product)
+	validation := productValidation(model.UPDATE)
+	err := validation.Struct(product)
+	if err != nil {
+		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.UPDATE)
+	}
+	err = s.db.UpdateProduct(s.ctx, product)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}

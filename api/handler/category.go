@@ -53,7 +53,7 @@ func (s service) DetailCategory(id int64) (map[string]interface{}, int) {
 }
 
 func (s service) CreateCategory(category model.Category) (map[string]interface{}, int) {
-	validation := categoryValidation(s.validation, model.CREATE)
+	validation := categoryValidation(model.CREATE)
 	err := validation.Struct(category)
 	if err != nil {
 		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.CREATE)
@@ -67,14 +67,14 @@ func (s service) CreateCategory(category model.Category) (map[string]interface{}
 }
 
 func (s service) UpdateCategory(category model.Category) (map[string]interface{}, int) {
-	validation := categoryValidation(s.validation, model.UPDATE)
+	validation := categoryValidation(model.UPDATE)
 	err := validation.Struct(category)
 	if err != nil {
 		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.UPDATE)
 	}
 	err = s.db.UpdateCategory(s.ctx, category)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
+		return utils.ResponseWrapper(http.StatusOK, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)

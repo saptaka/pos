@@ -60,12 +60,16 @@ func (r repo) GetCashiers(ctx context.Context,
 
 func (r repo) UpdateCashier(ctx context.Context,
 	cashierDetail model.Cashier) error {
+	_, err := r.GetCashierByID(ctx, cashierDetail.CashierId)
+	if err != nil {
+		return err
+	}
 	query := `UPDATE cashiers 
 		SET name=?, 
 			passcode=?, 
 			updated_at=CURRENT_TIMESTAMP() 
 		WHERE id=?`
-	_, err := r.db.ExecContext(ctx, query,
+	_, err = r.db.ExecContext(ctx, query,
 		cashierDetail.Name,
 		cashierDetail.Passcode,
 		cashierDetail.CashierId)

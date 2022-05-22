@@ -4,7 +4,7 @@ import "time"
 
 type Category struct {
 	CategoryId int64      `json:"categoryId"`
-	Name       string     `json:"name" validate:"required"`
+	Name       string     `json:"name"`
 	UpdatedAt  *time.Time `json:"updatedAt,omitempty"`
 	CreatedAt  *time.Time `json:"createdAt,omitempty"`
 }

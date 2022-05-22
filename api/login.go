@@ -28,7 +28,7 @@ func (r *apiRouter) GetPasscode(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("cashierId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, "", nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -48,7 +48,7 @@ func (r *apiRouter) VerifyLogin(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("cashierId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, "", nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -56,7 +56,7 @@ func (r *apiRouter) VerifyLogin(req *fasthttp.RequestCtx) {
 	var cashier model.Cashier
 	err := json.Unmarshal(req.Request.Body(), &cashier)
 	if err != nil {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, "", nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -75,7 +75,7 @@ func (r *apiRouter) VerifyLogout(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("cashierId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, "", nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -83,7 +83,7 @@ func (r *apiRouter) VerifyLogout(req *fasthttp.RequestCtx) {
 	var cashier model.Cashier
 	err := json.Unmarshal(req.Request.Body(), &cashier)
 	if err != nil {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, "", nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return

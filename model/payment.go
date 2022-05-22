@@ -4,8 +4,8 @@ import "time"
 
 type Payment struct {
 	PaymentId int64      `json:"paymentId"`
-	Name      string     `json:"name" validate:"required"`
-	Type      string     `json:"type" validate:"required"`
+	Name      string     `json:"name" `
+	Type      string     `json:"type" `
 	Logo      string     `json:"logo"`
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 	CreatedAt *time.Time `json:"createdAt,omitempty"`

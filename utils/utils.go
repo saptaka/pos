@@ -14,20 +14,30 @@ import (
 
 const (
 	Success = "Success"
-	Error   = "Error"
 )
 
 func ResponseWrapper(statusCode int, data interface{},
 	errorData []model.ErrorData) (map[string]interface{}, int) {
 	var response map[string]interface{}
+	var errorMessage interface{}
+	if errorData != nil {
+		errorMessage = errorData
+	} else {
+		errorMessage = make(map[string]interface{})
+	}
 	if statusCode != http.StatusOK {
-
+		var message string
+		switch v := data.(type) {
+		case string:
+			message = data.(string)
+			fmt.Printf("String: %v", v)
+		}
 		errorResponse := model.ErrorResponse{
 			Response: model.Response{
 				Success: false,
-				Message: data.(string),
+				Message: message,
 			},
-			Error: []interface{}{errorData},
+			Error: errorMessage,
 		}
 		jsonData, err := json.Marshal(errorResponse)
 		if err != nil {
@@ -78,41 +88,64 @@ func FormatCommas(num int) string {
 func ErrorWrapper(err error, statusCode int, processType string) (map[string]interface{}, int) {
 	var errorDatas []model.ErrorData
 	errorMessage := "body ValidationError: "
-	var errorContext interface{}
-
 	validationErrors := err.(validator.ValidationErrors)
-	for _, validationError := range validationErrors {
-		field := validationError.Field()
-		switch strings.ToUpper(processType) {
-		case "CREATE":
-			errorContext = model.CreateErrorContext{
+	switch strings.ToUpper(processType) {
+	case model.CREATE:
+		for _, validationError := range validationErrors {
+			field := validationError.Field()
+			param := validationError.Param()
+			errorContext := model.CreateErrorContext{
 				Key:   field,
 				Label: field,
 			}
+			errorData := model.ErrorData{
+				Message: param,
+				Path:    []string{field},
+				Type:    validationError.Tag(),
+				Context: errorContext,
+			}
+			errorMessage += param
+			errorDatas = append(errorDatas, errorData)
+		}
 
-		case "UPDATE":
-			errorContext = model.CustomErrorContext{
-				Label: field,
-				Peers: []string{
-					field,
-				},
-				PeersWithLabels: []string{
-					field,
-				},
+	case model.UPDATE:
+		for _, validationError := range validationErrors {
+
+			field := validationError.Field()
+			fields := strings.Split(field, ",")
+			param := validationError.Param()
+			errorContext := model.CustomErrorContext{
+				Label:           "value",
+				Peers:           fields,
+				PeersWithLabels: fields,
+				Value:           make(map[string]interface{}),
+			}
+			errorData := model.ErrorData{
+				Message: param,
+				Path:    []string{},
+				Type:    validationError.Tag(),
+				Context: errorContext,
+			}
+			errorMessage += param
+			errorDatas = append(errorDatas, errorData)
+		}
+	case model.SUBORDER:
+		for _, validationError := range validationErrors {
+
+			param := validationError.Param()
+			errorContext := model.CustomErrorContext{
+				Label: "value",
 				Value: make(map[string]interface{}),
 			}
-
+			errorData := model.ErrorData{
+				Message: param,
+				Path:    []string{},
+				Type:    validationError.Tag(),
+				Context: errorContext,
+			}
+			errorMessage += param
+			errorDatas = append(errorDatas, errorData)
 		}
-		param := validationError.Param()
-		errorData := model.ErrorData{
-			Message: param,
-			Path:    []string{field},
-			Type:    validationError.Tag(),
-			Context: errorContext,
-		}
-
-		errorMessage += param
-		errorDatas = append(errorDatas, errorData)
 	}
 
 	return ResponseWrapper(statusCode, errorMessage, errorDatas)

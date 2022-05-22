@@ -51,7 +51,7 @@ func (s service) DetailCashier(id int64) (map[string]interface{}, int) {
 }
 
 func (s service) CreateCashier(cashierDetail model.Cashier) (map[string]interface{}, int) {
-	validation := cashierValidation(s.validation, model.CREATE)
+	validation := cashierValidation(model.CREATE)
 	err := validation.Struct(cashierDetail)
 	if err != nil {
 		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.CREATE)
@@ -70,14 +70,14 @@ func (s service) CreateCashier(cashierDetail model.Cashier) (map[string]interfac
 }
 
 func (s service) UpdateCashier(cashierDetail model.Cashier) (map[string]interface{}, int) {
-	validation := cashierValidation(s.validation, model.UPDATE)
+	validation := cashierValidation(model.UPDATE)
 	err := validation.Struct(cashierDetail)
 	if err != nil {
 		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.UPDATE)
 	}
 	err = s.db.UpdateCashier(s.ctx, cashierDetail)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, "Cashier Not Found", nil)
 	}
 	if err != nil {
 		log.Println(err)
