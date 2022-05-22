@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/go-playground/validator"
 	"github.com/saptaka/pos/model"
 )
 
@@ -15,16 +16,17 @@ const (
 	Error   = "Error"
 )
 
-func ResponseWrapper(statusCode int, data interface{}) (map[string]interface{}, int) {
+func ResponseWrapper(statusCode int, data interface{},
+	errorData []model.ErrorData) (map[string]interface{}, int) {
 	var response map[string]interface{}
 	if statusCode != http.StatusOK {
 
 		errorResponse := model.ErrorResponse{
 			Response: model.Response{
 				Success: false,
-				Message: "body ValidationError: \"value\" must be an array",
+				Message: data.(string),
 			},
-			Error: []interface{}{data},
+			Error: []interface{}{errorData},
 		}
 		jsonData, err := json.Marshal(errorResponse)
 		if err != nil {
@@ -70,4 +72,23 @@ func FormatCommas(num int) string {
 		str = re.ReplaceAllString(str, "$1,$2")
 	}
 	return str
+}
+
+func ErrorWrapper(err error, statusCode int) (map[string]interface{}, int) {
+	var errorDatas []model.ErrorData
+	errorMessage := "body ValidationError: "
+	validationErrors := err.(validator.ValidationErrors)
+	for _, validationError := range validationErrors {
+		param := validationError.Param()
+		errorData := model.ErrorData{
+			Message: param,
+			Path:    []string{validationError.Field()},
+			Type:    validationError.Tag(),
+			Context: nil,
+		}
+		errorMessage += param
+		errorDatas = append(errorDatas, errorData)
+	}
+
+	return ResponseWrapper(statusCode, errorMessage, errorDatas)
 }

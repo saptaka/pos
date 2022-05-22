@@ -49,7 +49,7 @@ func (r *apiRouter) DetailPayment(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("paymentId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -68,7 +68,7 @@ func (r *apiRouter) CreatePayment(req *fasthttp.RequestCtx) {
 	var payment model.Payment
 	err := json.Unmarshal(req.Request.Body(), &payment)
 	if err != nil {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -89,7 +89,7 @@ func (r *apiRouter) UpdatePayment(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("paymentId").(string)
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -98,7 +98,7 @@ func (r *apiRouter) UpdatePayment(req *fasthttp.RequestCtx) {
 	var payment model.Payment
 	err := json.Unmarshal(req.Request.Body(), &payment)
 	if err != nil {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -119,7 +119,7 @@ func (r *apiRouter) DeletePayment(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("paymentId").(string)
 	id, _ := strconv.Atoi(idParams)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return

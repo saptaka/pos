@@ -47,7 +47,7 @@ func (r *apiRouter) DetailCategory(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("categoryId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -66,7 +66,7 @@ func (r *apiRouter) CreateCategory(req *fasthttp.RequestCtx) {
 	var category model.Category
 	err := json.Unmarshal(req.Request.Body(), &category)
 	if err != nil {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -86,7 +86,7 @@ func (r *apiRouter) UpdateCategory(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("categoryId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -95,7 +95,7 @@ func (r *apiRouter) UpdateCategory(req *fasthttp.RequestCtx) {
 	var category model.Category
 	err := json.Unmarshal(req.Request.Body(), &category)
 	if err != nil {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -115,7 +115,7 @@ func (r *apiRouter) DeleteCategory(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("categoryId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return

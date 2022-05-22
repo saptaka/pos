@@ -22,7 +22,7 @@ func (s service) ListPayment(limit, skip int) (map[string]interface{}, int) {
 	Payments, err := s.db.GetPayments(context.Background(), limit, skip)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 	listPayment := model.ListPayment{
 		Payments: Payments,
@@ -33,55 +33,55 @@ func (s service) ListPayment(limit, skip int) (map[string]interface{}, int) {
 		},
 	}
 
-	return utils.ResponseWrapper(http.StatusOK, listPayment)
+	return utils.ResponseWrapper(http.StatusOK, listPayment, nil)
 }
 
 func (s service) DetailPayment(id int64) (map[string]interface{}, int) {
 	payment, err := s.db.GetPaymentByID(context.Background(), id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, payment)
+	return utils.ResponseWrapper(http.StatusOK, payment, nil)
 }
 
 func (s service) CreatePayment(payment model.Payment) (map[string]interface{}, int) {
 	err := s.validation.Struct(payment)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 	if !model.PaymentType[payment.Type] {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 
 	paymentData, err := s.db.CreatePayment(s.ctx, payment)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, paymentData)
+		return utils.ResponseWrapper(http.StatusBadRequest, paymentData, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, paymentData)
+	return utils.ResponseWrapper(http.StatusOK, paymentData, nil)
 }
 
 func (s service) UpdatePayment(payment model.Payment) (map[string]interface{}, int) {
 	err := s.db.UpdatePayment(s.ctx, payment)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, nil)
+	return utils.ResponseWrapper(http.StatusOK, nil, nil)
 }
 
 func (s service) DeletePayment(id int) (map[string]interface{}, int) {
 	err := s.db.DeletePayment(s.ctx, id)
 	if err != nil {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, nil)
+	return utils.ResponseWrapper(http.StatusOK, nil, nil)
 }

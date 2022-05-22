@@ -26,11 +26,11 @@ func (s service) ListOrder(limit, skip int) (map[string]interface{}, int) {
 
 	orders, err := s.db.GetOrder(s.ctx, limit, skip)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 	listOrders := model.ListOrders{
 		Order: orders,
@@ -41,7 +41,7 @@ func (s service) ListOrder(limit, skip int) (map[string]interface{}, int) {
 		},
 	}
 
-	return utils.ResponseWrapper(http.StatusOK, listOrders)
+	return utils.ResponseWrapper(http.StatusOK, listOrders, nil)
 }
 
 func (s service) DetailOrder(id int64, receiptId string) (map[string]interface{}, int) {
@@ -87,19 +87,19 @@ func (s service) DetailOrder(id int64, receiptId string) (map[string]interface{}
 	errOrderedProduct := <-errorOrderedProductChan
 
 	if errOrder == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}
 
 	if errOrder != nil {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 
 	if errOrderedProduct == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}
 
 	if errOrderedProduct != nil {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 
 	orderDetails := model.OrderDetails{
@@ -107,7 +107,7 @@ func (s service) DetailOrder(id int64, receiptId string) (map[string]interface{}
 		OrderedProduct: orderedProducts,
 	}
 
-	return utils.ResponseWrapper(http.StatusOK, orderDetails)
+	return utils.ResponseWrapper(http.StatusOK, orderDetails, nil)
 }
 
 func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) (map[string]interface{}, int) {
@@ -115,13 +115,13 @@ func (s service) SubTotalOrder(orderRequest []model.OrderedProduct) (map[string]
 	orderedProductDetails, totalPrice, err := s.generateSubOrderedProduct(orderRequest)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 	subTotalOrder := model.SubTotalOrder{
 		Subtotal:       totalPrice,
 		OrderedProduct: orderedProductDetails,
 	}
-	return utils.ResponseWrapper(http.StatusOK, subTotalOrder)
+	return utils.ResponseWrapper(http.StatusOK, subTotalOrder, nil)
 }
 
 func (s service) AddOrder(orderRequest model.AddOrderRequest) (map[string]interface{}, int) {
@@ -130,7 +130,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) (map[string]interf
 	subOrderedProductDetails, totalPrice, err := s.generateSubOrderedProduct(orderRequest.OrderedProduct)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 
 	now, _ := time.Parse(model.RFC3339MilliZ, time.Now().UTC().Format(model.RFC3339MilliZ))
@@ -147,7 +147,7 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) (map[string]interf
 	order, err = s.db.CreateOrder(s.ctx, order)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 	var orderedProductDetails []model.OrderedProductDetail
 	for _, subOderedProductDetail := range subOrderedProductDetails {
@@ -175,27 +175,27 @@ func (s service) AddOrder(orderRequest model.AddOrderRequest) (map[string]interf
 		}
 	}()
 
-	return utils.ResponseWrapper(http.StatusOK, orders)
+	return utils.ResponseWrapper(http.StatusOK, orders, nil)
 }
 
 func (s service) DownloadOrder(id int64) (map[string]interface{}, int) {
 	receiptPath, err := s.db.DownloadReceipt(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, receiptPath)
+		return utils.ResponseWrapper(http.StatusNotFound, receiptPath, nil)
 	}
 	if err != nil {
-		return utils.ResponseWrapper(http.StatusBadRequest, receiptPath)
+		return utils.ResponseWrapper(http.StatusBadRequest, receiptPath, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, receiptPath)
+	return utils.ResponseWrapper(http.StatusOK, receiptPath, nil)
 }
 
 func (s service) CheckOrderDownload(id int64) (map[string]interface{}, int) {
 	isDownloaded, err := s.db.GetDownloadStatus(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}
 	isDownloadedJson := map[string]interface{}{"isDownload": isDownloaded}
-	return utils.ResponseWrapper(http.StatusOK, isDownloadedJson)
+	return utils.ResponseWrapper(http.StatusOK, isDownloadedJson, nil)
 }
 
 func (s service) calculatePrice(discount model.Discount, price, qty int) int {

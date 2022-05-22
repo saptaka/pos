@@ -18,7 +18,7 @@ func middleware(next func(req *fasthttp.RequestCtx)) func(req *fasthttp.RequestC
 		reqToken := string(token)
 		splitToken := strings.Split(reqToken, "JWT ")
 		if len(splitToken) < 2 {
-			response, statusCode := utils.ResponseWrapper(http.StatusUnauthorized, nil)
+			response, statusCode := utils.ResponseWrapper(http.StatusUnauthorized, nil, nil)
 			req.Response.SetStatusCode(statusCode)
 			json.NewEncoder(req).Encode(response)
 			return
@@ -26,7 +26,7 @@ func middleware(next func(req *fasthttp.RequestCtx)) func(req *fasthttp.RequestC
 		reqToken = splitToken[1]
 
 		if reqToken == "" {
-			response, statusCode := utils.ResponseWrapper(http.StatusUnauthorized, nil)
+			response, statusCode := utils.ResponseWrapper(http.StatusUnauthorized, nil, nil)
 			log.Println("unknown token")
 			req.Response.SetStatusCode(statusCode)
 			json.NewEncoder(req).Encode(response)
@@ -34,7 +34,7 @@ func middleware(next func(req *fasthttp.RequestCtx)) func(req *fasthttp.RequestC
 		}
 
 		if reqToken != Token {
-			response, statusCode := utils.ResponseWrapper(http.StatusUnauthorized, nil)
+			response, statusCode := utils.ResponseWrapper(http.StatusUnauthorized, nil, nil)
 			log.Println("unknown token")
 			req.Response.SetStatusCode(statusCode)
 			json.NewEncoder(req).Encode(response)

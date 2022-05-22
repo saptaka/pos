@@ -52,7 +52,7 @@ func (r *apiRouter) DetailOrder(req *fasthttp.RequestCtx) {
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	re, err := regexp.Compile(`S[0-9]{3}[A-Z]{1}`)
 	if err != nil {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -60,7 +60,7 @@ func (r *apiRouter) DetailOrder(req *fasthttp.RequestCtx) {
 
 	isReceiptId := re.MatchString(idParams)
 	if id == 0 && !isReceiptId {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -84,22 +84,22 @@ func (r *apiRouter) SubTotalOrder(req *fasthttp.RequestCtx) {
 	var orderedProducts []model.OrderedProduct
 	err := json.Unmarshal(req.Request.Body(), &orderedProducts)
 	if err != nil {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
 	}
 	if len(orderedProducts) == 0 {
-		response, _ := utils.ResponseWrapper(http.StatusBadRequest,
-			model.ErrorData{
+		response, _ := utils.ResponseWrapper(http.StatusBadRequest, "\"value\" must be an array",
+			[]model.ErrorData{{
 				Message: "\"value\" must be an array",
 				Path:    []string{},
 				Type:    "array.base",
-				Context: model.ErrorContext{
+				Context: model.CreateErrorContext{
 					Label: "value",
-					Value: make(map[string]interface{}),
+					Key:   make(map[string]interface{}),
 				},
-			})
+			}})
 		json.NewEncoder(req).Encode(response)
 		return
 	}
@@ -117,7 +117,7 @@ func (r *apiRouter) AddOrder(req *fasthttp.RequestCtx) {
 	var addOrderRequest model.AddOrderRequest
 	err := json.Unmarshal(req.Request.Body(), &addOrderRequest)
 	if err != nil {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -136,7 +136,7 @@ func (r *apiRouter) DownloadOrder(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("orderId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return
@@ -155,7 +155,7 @@ func (r *apiRouter) CheckOrderDownload(req *fasthttp.RequestCtx) {
 	idParams := req.UserValue("orderId").(string)
 	id, _ := strconv.ParseInt(idParams, 10, 0)
 	if id == 0 {
-		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil)
+		response, statusCode := utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 		req.Response.SetStatusCode(statusCode)
 		json.NewEncoder(req).Encode(response)
 		return

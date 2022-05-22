@@ -26,6 +26,7 @@ type service struct {
 var productCache syncMap
 
 func NewHandler(ctx context.Context, db repository.Repo, validation *validator.Validate) Service {
+
 	handlerService := service{ctx, db, validation}
 	productCache = syncMap{}
 	go func() {

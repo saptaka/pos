@@ -22,11 +22,11 @@ func (s service) ListCategory(limit, skip int) (map[string]interface{}, int) {
 	categories, err := s.db.GetCategories(context.Background(), limit, skip)
 
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 	listCashier := model.ListCategory{
 		Categories: categories,
@@ -36,56 +36,56 @@ func (s service) ListCategory(limit, skip int) (map[string]interface{}, int) {
 			Skip:  skip,
 		},
 	}
-	return utils.ResponseWrapper(http.StatusOK, listCashier)
+	return utils.ResponseWrapper(http.StatusOK, listCashier, nil)
 }
 
 func (s service) DetailCategory(id int64) (map[string]interface{}, int) {
 	category, err := s.db.GetCategoryByID(context.Background(), id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, category)
+	return utils.ResponseWrapper(http.StatusOK, category, nil)
 }
 
 func (s service) CreateCategory(category model.Category) (map[string]interface{}, int) {
 	err := s.validation.Struct(category)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 	CategoryData, err := s.db.CreateCategory(s.ctx, category.Name)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, CategoryData)
+		return utils.ResponseWrapper(http.StatusBadRequest, CategoryData, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, CategoryData)
+	return utils.ResponseWrapper(http.StatusOK, CategoryData, nil)
 }
 
 func (s service) UpdateCategory(category model.Category) (map[string]interface{}, int) {
 
 	err := s.db.UpdateCategory(s.ctx, category)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, nil)
+	return utils.ResponseWrapper(http.StatusOK, nil, nil)
 }
 
 func (s service) DeleteCategory(id int64) (map[string]interface{}, int) {
 	err := s.db.DeleteCategory(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, nil)
+	return utils.ResponseWrapper(http.StatusOK, nil, nil)
 }

@@ -49,21 +49,21 @@ func (s service) ListProduct(limit, skip int, product model.Product) (map[string
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, listProduct)
+		return utils.ResponseWrapper(http.StatusBadRequest, listProduct, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, listProduct)
+	return utils.ResponseWrapper(http.StatusOK, listProduct, nil)
 }
 
 func (s service) DetailProduct(id int64) (map[string]interface{}, int) {
 	Product, err := s.db.GetProductByID(context.Background(), id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, Product)
+	return utils.ResponseWrapper(http.StatusOK, Product, nil)
 }
 
 func (s service) CreateProduct(productRequest model.ProductCreateRequest) (map[string]interface{}, int) {
@@ -71,7 +71,7 @@ func (s service) CreateProduct(productRequest model.ProductCreateRequest) (map[s
 	product, err := s.db.CreateProduct(s.ctx, productRequest)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, product)
+		return utils.ResponseWrapper(http.StatusBadRequest, product, nil)
 	}
 
 	productCache.Set(product.ProductId, product)
@@ -88,34 +88,34 @@ func (s service) CreateProduct(productRequest model.ProductCreateRequest) (map[s
 		CategoryId: product.CategoryId,
 	}
 
-	return utils.ResponseWrapper(http.StatusOK, productCreatedResponse)
+	return utils.ResponseWrapper(http.StatusOK, productCreatedResponse, nil)
 }
 
 func (s service) UpdateProduct(product model.Product) (map[string]interface{}, int) {
 	err := s.db.UpdateProduct(s.ctx, product)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
 
 	productCache.Set(product.ProductId, product)
 
-	return utils.ResponseWrapper(http.StatusOK, nil)
+	return utils.ResponseWrapper(http.StatusOK, nil, nil)
 }
 
 func (s service) DeleteProduct(id int64) (map[string]interface{}, int) {
 	err := s.db.DeleteProduct(s.ctx, id)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusNotFound, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
 	}
-	return utils.ResponseWrapper(http.StatusOK, nil)
+	return utils.ResponseWrapper(http.StatusOK, nil, nil)
 }
 
 func (s service) LoadProduct() error {
