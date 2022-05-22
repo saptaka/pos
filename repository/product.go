@@ -220,41 +220,44 @@ func (r repo) GetProducts(ctx context.Context,
 }
 
 func (r repo) UpdateProduct(ctx context.Context,
-	Product model.Product) error {
-
+	product model.Product) error {
+	_, err := r.GetProductByID(ctx, product.ProductId)
+	if err != nil {
+		return err
+	}
 	query := `UPDATE products SET `
 	var countUpdate int
 	var values []interface{}
-	if Product.Name != "" {
+	if product.Name != "" {
 		countUpdate++
 		query += " name=?,"
-		values = append(values, Product.Name)
+		values = append(values, product.Name)
 	}
-	if Product.Image != "" {
+	if product.Image != "" {
 		query += " 	image=?,"
-		values = append(values, Product.Image)
+		values = append(values, product.Image)
 	}
-	if Product.Stock != 0 {
+	if product.Stock != 0 {
 		query += " 	stock=?,"
-		values = append(values, Product.Stock)
+		values = append(values, product.Stock)
 	}
-	if Product.Price != 0 {
+	if product.Price != 0 {
 		query += " price=?,"
-		values = append(values, Product.Price)
+		values = append(values, product.Price)
 	}
-	if Product.CategoryId != nil && *Product.CategoryId != 0 {
+	if product.CategoryId != nil && *product.CategoryId != 0 {
 		query += " category_id=?,"
-		values = append(values, Product.CategoryId)
+		values = append(values, product.CategoryId)
 	}
 
 	if countUpdate > 0 {
 		query += " updated_at=CURRENT_TIMESTAMP()  WHERE id=? "
-		values = append(values, Product.ProductId)
+		values = append(values, product.ProductId)
 	} else {
 		return fmt.Errorf("nothing updated")
 	}
 
-	_, err := r.db.ExecContext(ctx, query, values...)
+	_, err = r.db.ExecContext(ctx, query, values...)
 	if err != nil {
 		return err
 	}
@@ -337,8 +340,12 @@ func (r repo) CreateProduct(ctx context.Context, product model.ProductCreateRequ
 }
 
 func (r repo) DeleteProduct(ctx context.Context, id int64) error {
+	_, err := r.GetProductByID(ctx, id)
+	if err != nil {
+		return err
+	}
 	query := "DELETE FROM products WHERE id=?"
-	_, err := r.db.ExecContext(ctx, query, id)
+	_, err = r.db.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}

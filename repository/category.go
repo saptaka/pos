@@ -107,7 +107,6 @@ func (r repo) CreateCategory(ctx context.Context, name string) (model.Category, 
 }
 
 func (r repo) DeleteCategory(ctx context.Context, id int64) error {
-
 	_, err := r.GetCategoryByID(ctx, id)
 	if err != nil {
 		return err
