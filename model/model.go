@@ -31,8 +31,15 @@ type ErrorData struct {
 }
 
 type CreateErrorContext struct {
-	Label string      `json:"label"`
-	Key   interface{} `json:"key"`
+	Label string `json:"label"`
+	Key   string `json:"key"`
+}
+
+type CustomErrorContext struct {
+	Peers           []string    `json:"Peers"`
+	PeersWithLabels []string    `json:"peersWithLabels"`
+	Label           string      `json:"label"`
+	Value           interface{} `json:"value"`
 }
 
 func ContentTypeJSON() ([]byte, []byte) {
@@ -42,3 +49,8 @@ func ContentTypeJSON() ([]byte, []byte) {
 	)
 	return strContentType, strApplicationJSON
 }
+
+const (
+	CREATE = "CREATE"
+	UPDATE = "UPDATE"
+)

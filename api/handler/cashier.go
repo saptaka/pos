@@ -51,10 +51,10 @@ func (s service) DetailCashier(id int64) (map[string]interface{}, int) {
 }
 
 func (s service) CreateCashier(cashierDetail model.Cashier) (map[string]interface{}, int) {
-	validation := generateCashierCreateValidation(s.validation)
+	validation := cashierValidation(s.validation, model.CREATE)
 	err := validation.Struct(cashierDetail)
 	if err != nil {
-		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest)
+		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.CREATE)
 	}
 
 	_, err = strconv.Atoi(cashierDetail.Passcode)
@@ -70,8 +70,12 @@ func (s service) CreateCashier(cashierDetail model.Cashier) (map[string]interfac
 }
 
 func (s service) UpdateCashier(cashierDetail model.Cashier) (map[string]interface{}, int) {
-
-	err := s.db.UpdateCashier(s.ctx, cashierDetail)
+	validation := cashierValidation(s.validation, model.UPDATE)
+	err := validation.Struct(cashierDetail)
+	if err != nil {
+		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.UPDATE)
+	}
+	err = s.db.UpdateCashier(s.ctx, cashierDetail)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}

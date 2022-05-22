@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/go-playground/validator"
 	"github.com/saptaka/pos/model"
@@ -74,18 +75,42 @@ func FormatCommas(num int) string {
 	return str
 }
 
-func ErrorWrapper(err error, statusCode int) (map[string]interface{}, int) {
+func ErrorWrapper(err error, statusCode int, processType string) (map[string]interface{}, int) {
 	var errorDatas []model.ErrorData
 	errorMessage := "body ValidationError: "
+	var errorContext interface{}
+
 	validationErrors := err.(validator.ValidationErrors)
 	for _, validationError := range validationErrors {
+		field := validationError.Field()
+		switch strings.ToUpper(processType) {
+		case "CREATE":
+			errorContext = model.CreateErrorContext{
+				Key:   field,
+				Label: field,
+			}
+
+		case "UPDATE":
+			errorContext = model.CustomErrorContext{
+				Label: field,
+				Peers: []string{
+					field,
+				},
+				PeersWithLabels: []string{
+					field,
+				},
+				Value: make(map[string]interface{}),
+			}
+
+		}
 		param := validationError.Param()
 		errorData := model.ErrorData{
 			Message: param,
-			Path:    []string{validationError.Field()},
+			Path:    []string{field},
 			Type:    validationError.Tag(),
-			Context: nil,
+			Context: errorContext,
 		}
+
 		errorMessage += param
 		errorDatas = append(errorDatas, errorData)
 	}

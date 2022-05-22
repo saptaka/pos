@@ -8,6 +8,7 @@ import (
 
 	"github.com/saptaka/pos/model"
 	"github.com/saptaka/pos/utils"
+	"github.com/valyala/fasthttp"
 )
 
 type Category interface {
@@ -52,22 +53,26 @@ func (s service) DetailCategory(id int64) (map[string]interface{}, int) {
 }
 
 func (s service) CreateCategory(category model.Category) (map[string]interface{}, int) {
-	err := s.validation.Struct(category)
+	validation := categoryValidation(s.validation, model.CREATE)
+	err := validation.Struct(category)
+	if err != nil {
+		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.CREATE)
+	}
+	categoryData, err := s.db.CreateCategory(s.ctx, category.Name)
 	if err != nil {
 		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, nil, nil)
+		return utils.ResponseWrapper(http.StatusBadRequest, categoryData, nil)
 	}
-	CategoryData, err := s.db.CreateCategory(s.ctx, category.Name)
-	if err != nil {
-		log.Println(err)
-		return utils.ResponseWrapper(http.StatusBadRequest, CategoryData, nil)
-	}
-	return utils.ResponseWrapper(http.StatusOK, CategoryData, nil)
+	return utils.ResponseWrapper(http.StatusOK, categoryData, nil)
 }
 
 func (s service) UpdateCategory(category model.Category) (map[string]interface{}, int) {
-
-	err := s.db.UpdateCategory(s.ctx, category)
+	validation := categoryValidation(s.validation, model.UPDATE)
+	err := validation.Struct(category)
+	if err != nil {
+		return utils.ErrorWrapper(err, fasthttp.StatusBadRequest, model.UPDATE)
+	}
+	err = s.db.UpdateCategory(s.ctx, category)
 	if err == sql.ErrNoRows {
 		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}

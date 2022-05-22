@@ -97,7 +97,7 @@ func (r *apiRouter) SubTotalOrder(req *fasthttp.RequestCtx) {
 				Type:    "array.base",
 				Context: model.CreateErrorContext{
 					Label: "value",
-					Key:   make(map[string]interface{}),
+					Key:   "",
 				},
 			}})
 		json.NewEncoder(req).Encode(response)
