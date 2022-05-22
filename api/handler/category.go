@@ -74,7 +74,7 @@ func (s service) UpdateCategory(category model.Category) (map[string]interface{}
 	}
 	err = s.db.UpdateCategory(s.ctx, category)
 	if err == sql.ErrNoRows {
-		return utils.ResponseWrapper(http.StatusOK, nil, nil)
+		return utils.ResponseWrapper(http.StatusNotFound, nil, nil)
 	}
 	if err != nil {
 		log.Println(err)
